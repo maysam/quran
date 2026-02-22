@@ -1,0 +1,59 @@
+---
+layout: base.njk
+---
+
+<article class="verse-page">
+  <div class="verse-header">
+    <h1>Surah {{ surahName }}</h1>
+    <p class="surah-info">Surah {{ surahNumber }} • Verse {{ verseInSurah }}</p>
+  </div>
+
+  <div class="verse-navigation">
+    {% if verseNumber > 1 %}
+      <a href="/verse/{{ verseNumber - 1 }}/" class="nav-link prev">← Previous</a>
+    {% else %}
+      <span class="nav-link disabled">← Previous</span>
+    {% endif %}
+    
+    <span class="verse-indicator">Verse {{ verseNumber }} of 6236</span>
+    
+    {% if verseNumber < 6236 %}
+      <a href="/verse/{{ verseNumber + 1 }}/" class="nav-link next">Next →</a>
+    {% else %}
+      <span class="nav-link disabled">Next →</span>
+    {% endif %}
+  </div>
+
+  <div class="verse-container">
+    {% if hasBismillah %}
+    <div class="bismillah">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَـٰنِ ٱلرَّحِیمِ</div>
+    {% endif %}
+    <div class="verse-number">{{ verseInSurah }}</div>
+    <div class="verse-text">{{ verseText }}</div>
+  </div>
+
+  <div class="surah-navigation">
+    <a href="/verse/{{ surahStartVerse }}/" class="surah-nav-link">⏮ Start of {{ surahName }}</a>
+    {% if nextSurahStart %}
+      <a href="/verse/{{ nextSurahStart }}/" class="surah-nav-link">Next Surah ⏭</a>
+    {% else %}
+      <span class="surah-nav-link disabled">Next Surah ⏭</span>
+    {% endif %}
+  </div>
+
+  <div class="verse-navigation bottom">
+    {% if verseNumber > 1 %}
+      <a href="/verse/{{ verseNumber - 1 }}/" class="nav-link prev">← Previous</a>
+    {% else %}
+      <span class="nav-link disabled">← Previous</span>
+    {% endif %}
+    
+    <a href="/" class="nav-link home">Home</a>
+    
+    {% if verseNumber < 6236 %}
+      <a href="/verse/{{ verseNumber + 1 }}/" class="nav-link next">Next →</a>
+    {% else %}
+      <span class="nav-link disabled">Next →</span>
+    {% endif %}
+  </div>
+</article>

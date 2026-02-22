@@ -1,0 +1,55 @@
+---
+title: Home
+layout: base.njk
+---
+
+<div class="home-page">
+  <h1>The Holy Quran</h1>
+  <p class="subtitle">Uthmani Script</p>
+  
+  <div class="search-section">
+    <input type="number" id="verseSearch" placeholder="Enter verse number (1-6236)" min="1" max="6236">
+    <p class="search-hint">Press Enter to go to verse</p>
+  </div>
+  
+  <div class="action-buttons">
+    <a href="/surahs/" class="action-btn primary">Browse All 114 Surahs</a>
+    <a href="#" onclick="goToRandomVerse(); return false;" class="action-btn secondary">Random Verse</a>
+  </div>
+  
+  <h2>Quick Links</h2>
+  <div class="quick-links">
+    <a href="/verse/1/">
+      <span class="link-title">Al-Fatihah</span>
+      <span class="link-desc">Surah 1</span>
+    </a>
+    <a href="/verse/3534/">
+      <span class="link-title">Al-Ahzab</span>
+      <span class="link-desc">Surah 33</span>
+    </a>
+    <a href="/verse/2141/">
+      <span class="link-title">Al-Kahf</span>
+      <span class="link-desc">Surah 18</span>
+    </a>
+    <a href="/verse/5592/">
+      <span class="link-title">An-Insaan</span>
+      <span class="link-desc">Surah 76</span>
+    </a>
+  </div>
+</div>
+
+<script>
+  document.getElementById('verseSearch').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      const num = parseInt(this.value);
+      if (num >= 1 && num <= 6236) {
+        window.location.href = '/verse/' + num + '/';
+      }
+    }
+  });
+  
+  function goToRandomVerse() {
+    const randomVerse = Math.floor(Math.random() * 6236) + 1;
+    window.location.href = '/verse/' + randomVerse + '/';
+  }
+</script>

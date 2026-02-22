@@ -1,0 +1,14 @@
+---
+layout: base.njk
+title: Random Verse
+permalink: /random/
+---
+
+<div class="container" style="text-align: center; padding: 4rem 1rem;">
+  <h2>Loading random verse...</h2>
+</div>
+
+<script>
+  const randomVerse = Math.floor(Math.random() * 6236) + 1;
+  window.location.replace('/verse/' + randomVerse + '/');
+</script>

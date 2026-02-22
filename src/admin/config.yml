@@ -1,0 +1,33 @@
+backend:
+  name: git-gateway
+  branch: main
+
+local_backend: true
+
+media_folder: "src/images"
+public_folder: "/images"
+
+collections:
+  - name: "verses"
+    label: "Verses"
+    label_singular: "Verse"
+    folder: "src/verses"
+    create: false
+    slug: "verse-{{verseNumber}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Verse Number", name: "verseNumber", widget: "number", value_type: "int" }
+      - { label: "Verse Text", name: "verseText", widget: "text" }
+      - { label: "Layout", name: "layout", widget: "hidden", default: "verse.njk" }
+      - { label: "Permalink", name: "permalink", widget: "string" }
+      - { label: "Body", name: "body", widget: "markdown" }
+
+  - name: "pages"
+    label: "Pages"
+    files:
+      - label: "Home Page"
+        name: "home"
+        file: "src/index.njk"
+        fields:
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Layout", name: "layout", widget: "hidden", default: "base.njk" }

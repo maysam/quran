@@ -1,0 +1,13 @@
+{
+  "name": "quran-verses-site",
+  "version": "1.0.0",
+  "description": "Quran verses website with Decap CMS",
+  "scripts": {
+    "build": "npx eleventy",
+    "serve": "npx eleventy --serve",
+    "generate-verses": "node scripts/generate-verses.js"
+  },
+  "dependencies": {
+    "@11ty/eleventy": "^2.0.1"
+  }
+}
