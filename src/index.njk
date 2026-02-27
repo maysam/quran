@@ -19,19 +19,19 @@ layout: base.njk
   
   <h2>Quick Links</h2>
   <div class="quick-links">
-    <a href="/verse/1/">
+    <a href="/surah/1/1/">
       <span class="link-title">Al-Fatihah</span>
       <span class="link-desc">Surah 1</span>
     </a>
-    <a href="/verse/3534/">
+    <a href="/surah/33/1/">
       <span class="link-title">Al-Ahzab</span>
       <span class="link-desc">Surah 33</span>
     </a>
-    <a href="/verse/2141/">
+    <a href="/surah/18/1/">
       <span class="link-title">Al-Kahf</span>
       <span class="link-desc">Surah 18</span>
     </a>
-    <a href="/verse/5592/">
+    <a href="/surah/76/1/">
       <span class="link-title">An-Insaan</span>
       <span class="link-desc">Surah 76</span>
     </a>
@@ -39,17 +39,32 @@ layout: base.njk
 </div>
 
 <script>
+  const surahVerseStarts = [1,8,294,494,670,790,955,1161,1236,1365,1474,1597,1708,1751,1803,1902,2030,2141,2251,2349,2484,2596,2674,2792,2856,2933,3160,3253,3341,3410,3470,3504,3534,3607,3661,3706,3789,3971,4059,4134,4219,4273,4326,4415,4474,4511,4546,4584,4613,4631,4676,4736,4785,4847,4902,4980,5076,5105,5127,5151,5164,5178,5189,5200,5218,5230,5242,5272,5324,5376,5420,5448,5476,5496,5552,5592,5623,5673,5713,5759,5801,5830,5849,5885,5910,5932,5949,5968,5994,6024,6044,6059,6080,6091,6099,6107,6126,6131,6139,6147,6158,6169,6177,6180,6189,6194,6198,6205,6208,6214,6217,6222,6226,6231];
+  
+  function goToVerse(globalVerseNum) {
+    let surahNum = 1;
+    for (let i = 0; i < surahVerseStarts.length; i++) {
+      if (globalVerseNum >= surahVerseStarts[i]) {
+        surahNum = i + 1;
+      } else {
+        break;
+      }
+    }
+    const verseInSurah = globalVerseNum - surahVerseStarts[surahNum - 1] + 1;
+    window.location.href = '/surah/' + surahNum + '/' + verseInSurah + '/';
+  }
+  
   document.getElementById('verseSearch').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
       const num = parseInt(this.value);
       if (num >= 1 && num <= 6236) {
-        window.location.href = '/verse/' + num + '/';
+        goToVerse(num);
       }
     }
   });
   
   function goToRandomVerse() {
     const randomVerse = Math.floor(Math.random() * 6236) + 1;
-    window.location.href = '/verse/' + randomVerse + '/';
+    goToVerse(randomVerse);
   }
 </script>

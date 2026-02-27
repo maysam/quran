@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.6.2] - 2026-02-27
+
+### Added
+- Backwards-compatible redirect pages so legacy `/verse/:globalVerseNumber/` URLs continue to work
+
+## [1.6.1] - 2026-02-27
+
+### Changed
+- Combined surah number and type emoji into single element on surahs page for cleaner layout
+
+## [1.6.0] - 2026-02-22
+
+### Changed
+- **Breaking:** Changed verse URL structure from `/verse/:globalVerseNumber/` to `/surah/:surahNumber/:verseInSurah/`
+- Updated all navigation links to use new semantic URL format
+- Updated quick links, surahs page, and random verse functionality
+
+### Added
+- 404 error page for better user experience
+- `.nojekyll` file for GitHub Pages compatibility
+- `goToVerse()` helper function for converting global verse numbers to surah/verse format
+
+### Fixed
+- GitHub Pages compatibility issues
+
 ## [1.5.1] - 2026-02-22
 
 ### Added

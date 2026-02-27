@@ -40,6 +40,20 @@
 - [x] Display Bismillah above verse content with dedicated styling
 - [x] Keep Al-Fatihah verse 1 unchanged (Bismillah IS the verse)
 
+### Update Verse Routing and GitHub Pages Compatibility
+- [x] Change URL structure from `/verse/:globalVerseNumber/` to `/surah/:surahNumber/:verseInSurah/`
+- [x] Update generate-verses.js script with new permalink format
+- [x] Update verse.njk template with new navigation links
+- [x] Update surahs.njk with new surah links
+- [x] Update index.njk quick links and search functionality
+- [x] Update random.njk with new URL conversion logic
+- [x] Add .nojekyll file for GitHub Pages compatibility
+- [x] Add 404.html error page
+- [x] Regenerate all 6236 verse files with new permalinks
+
+### Restore Legacy Global Verse URLs
+- [x] Add backwards-compatible redirect pages for legacy `/verse/:globalVerseNumber/` URLs
+
 ## Project Structure
 ```
 /Users/maysam/Workspace/aralel/indented/

@@ -125,7 +125,7 @@ nextSurahStart: ${nextSurahStart || 'null'}
 hasBismillah: ${hasBismillah}
 verseText: "${escapedText}"
 layout: verse.njk
-permalink: /verse/${verseNumber}/
+permalink: /surah/${surahInfo.surahNumber}/${surahInfo.verseInSurah}/
 ---
 
 ${verseText}

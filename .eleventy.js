@@ -1,6 +1,10 @@
 module.exports = function(eleventyConfig) {
+  eleventyConfig.setUseGitIgnore(false);
+  
   eleventyConfig.addPassthroughCopy("src/admin");
+  eleventyConfig.addPassthroughCopy("src/assets");
   eleventyConfig.addPassthroughCopy("src/css");
+  eleventyConfig.addPassthroughCopy("src/.nojekyll");
   
   eleventyConfig.addCollection("verses", function(collectionApi) {
     return collectionApi.getFilteredByGlob("src/verses/*.md").sort((a, b) => {

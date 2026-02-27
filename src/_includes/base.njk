@@ -14,21 +14,15 @@
     <nav>
       <a href="/">Home</a>
       <a href="/surahs/">Surahs</a>
-      <a href="/random" onclick="goToRandomVerse(); return false;">Random Verse</a>
+      <a href="/random">Random Verse</a>
       <a href="/admin/">Admin</a>
     </nav>
   </header>
-  <script>
-    function goToRandomVerse() {
-      const randomVerse = Math.floor(Math.random() * 6236) + 1;
-      window.location.href = '/verse/' + randomVerse + '/';
-    }
-  </script>
   <main>
     {{ content | safe }}
   </main>
   <footer>
-    <p>The Holy Quran - Uthmani Script</p>
+    <p>The Holy Quran</p>
   </footer>
 </body>
 </html>
