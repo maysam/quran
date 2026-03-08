@@ -54,24 +54,60 @@
 ### Restore Legacy Global Verse URLs
 - [x] Add backwards-compatible redirect pages for legacy `/verse/:globalVerseNumber/` URLs
 
+### Migrate from Eleventy to Jekyll
+- [x] Migrate entire project from Eleventy (11ty) to Jekyll
+- [x] Convert all Nunjucks templates to Liquid templates (.html)
+- [x] Update directory structure to Jekyll conventions (_layouts/, _verses/, assets/)
+- [x] Create Gemfile and _config.yml for Jekyll
+- [x] Update Decap CMS configuration for Jekyll structure
+- [x] Regenerate all verse files with Jekyll permalinks
+
+### Add Comprehensive Word Index System
+- [x] Convert generate-verses.js from Node.js to Ruby (generate-verses.rb)
+- [x] Implement diacritic removal for word normalization
+- [x] Generate 18,857 unique word pages (one for each word without diacritics)
+- [x] Create main alphabet index page at /words/ with 34 Arabic letters
+- [x] Generate 806 paginated letter pages (24 words per page)
+- [x] Implement hash-based URL slugs for word pages (MD5)
+- [x] Add pagination system with Previous/Next navigation
+- [x] Create word page layout showing all occurrences
+- [x] Add CSS styling for alphabet grid, letter pages, and pagination
+- [x] Update navigation to include "Words" link
+
+## Current Prompt
+**Task**: Restructure word index to use paginated letter pages instead of single long page
+- Main `/words/` page shows alphabet grid with 34 letters and word counts
+- Clicking a letter goes to `/words/{letter_code}/` with paginated word list
+- Each page shows 24 words in a grid layout
+- Pagination controls for navigating between pages
+- Responsive design for mobile and desktop
+
 ## Project Structure
 ```
 /Users/maysam/Workspace/aralel/indented/
-├── src/
-│   ├── _includes/       # Templates
-│   ├── admin/           # Decap CMS
-│   ├── css/             # Styles
-│   ├── verses/          # 6236 verse files
-│   └── index.njk        # Home page
+├── _layouts/            # Jekyll layouts (default, verse, word)
+├── _verses/             # 6,236 verse markdown files (Jekyll collection)
+├── _words/              # 18,857 word markdown files (Jekyll collection)
+├── words/               # Paginated letter pages
+│   ├── 1569/           # Letter ء pages
+│   │   ├── index.html  # Page 1
+│   │   └── page/       # Pages 2-9
+│   ├── 1571/           # Letter أ pages
+│   └── ...             # 34 letters total
+├── admin/               # Decap CMS admin interface
+├── assets/
+│   └── css/
+│       └── style.css    # Main styles
 ├── scripts/
-│   └── generate-verses.js
-├── .eleventy.js
-├── package.json
-└── quran-uthmani.txt
+│   └── generate-verses.rb  # Ruby script for generation
+├── _config.yml          # Jekyll configuration
+├── Gemfile              # Ruby dependencies
+├── words.html           # Main alphabet index
+└── quran-uthmani.txt    # Source Quran text
 ```
 
 ## Commands
-- `npm install` - Install dependencies
-- `npm run generate-verses` - Generate verse files from quran-uthmani.txt
-- `npm run serve` - Run dev server at http://localhost:8080
-- `npm run build` - Build static site to _site/
+- `bundle install` - Install Ruby dependencies
+- `ruby scripts/generate-verses.rb` - Generate all content (verses, words, alphabet, letter pages)
+- `bundle exec jekyll serve` - Run dev server at http://localhost:4000
+- `bundle exec jekyll build` - Build static site to _site/

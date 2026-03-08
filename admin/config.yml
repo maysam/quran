@@ -4,21 +4,21 @@ backend:
 
 local_backend: true
 
-media_folder: "src/images"
-public_folder: "/images"
+media_folder: "assets/images"
+public_folder: "/assets/images"
 
 collections:
   - name: "verses"
     label: "Verses"
     label_singular: "Verse"
-    folder: "src/verses"
+    folder: "_verses"
     create: false
     slug: "verse-{{verseNumber}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Verse Number", name: "verseNumber", widget: "number", value_type: "int" }
       - { label: "Verse Text", name: "verseText", widget: "text" }
-      - { label: "Layout", name: "layout", widget: "hidden", default: "verse.njk" }
+      - { label: "Layout", name: "layout", widget: "hidden", default: "verse" }
       - { label: "Permalink", name: "permalink", widget: "string" }
       - { label: "Body", name: "body", widget: "markdown" }
 
@@ -27,7 +27,7 @@ collections:
     files:
       - label: "Home Page"
         name: "home"
-        file: "src/index.njk"
+        file: "index.html"
         fields:
           - { label: "Title", name: "title", widget: "string" }
-          - { label: "Layout", name: "layout", widget: "hidden", default: "base.njk" }
+          - { label: "Layout", name: "layout", widget: "hidden", default: "default" }

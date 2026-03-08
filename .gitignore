@@ -3,9 +3,14 @@ _site
 
 # Dependencies
 node_modules
+vendor/
+.bundle/
 
 # Generated content
-src/verses/
+_verses/
+_words
+words
+_data/words.json
 
 # Environment
 .env
@@ -27,4 +32,12 @@ npm-debug.log*
 
 # Cache
 .cache/
-.eleventy.cache/
+.sass-cache/
+.jekyll-cache/
+
+# Ruby
+Gemfile.lock
+
+# Temporary files
+*.tmp
+*.bak

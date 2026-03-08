@@ -1,0 +1,64 @@
+# Site settings
+title: "The Holy Quran"
+description: "Quran verses website with Decap CMS - Uthmani Script"
+url: ""
+baseurl: ""
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+permalink: pretty
+
+# Collections
+collections:
+  verses:
+    output: true
+    permalink: /:path/
+  words:
+    output: true
+    permalink: /:path/
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Exclude from processing
+exclude:
+  - node_modules
+  - package.json
+  - package-lock.json
+  - .eleventy.js
+  - scripts/
+  - quran-uthmani.txt
+  - README.md
+  - .gitignore
+  - CHANGELOG.md
+  - plan.md
+
+# Include files that start with dot
+include:
+  - .nojekyll
+
+# Sass
+sass:
+  style: compressed
+  sass_dir: assets/css
+
+# Defaults
+defaults:
+  - scope:
+      path: "_verses"
+      type: "verses"
+    values:
+      layout: "verse"
+  - scope:
+      path: "_words"
+      type: "words"
+    values:
+      layout: "word"
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"

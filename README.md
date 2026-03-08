@@ -1,89 +1,138 @@
 # Quran Verses Website
 
-A beautiful static website displaying all 6236 verses of the Holy Quran, built with Eleventy and Decap CMS.
+A beautiful static website displaying all 6236 verses of the Holy Quran with comprehensive word indexing, built with Jekyll and Decap CMS.
 
 ## Features
 
-- **Individual Verse Pages**: Each verse has its own dedicated page
+- **Individual Verse Pages**: Each verse has its own dedicated page with full navigation
+- **Word Index**: Browse 21,106+ unique Quran words alphabetically
+- **Individual Word Pages**: Each word shows all its occurrences across the Quran
 - **Arabic RTL Support**: Proper right-to-left text rendering with Amiri font
-- **Responsive Design**: Works on desktop and mobile devices
-- **Navigation**: Easy navigation between verses
+- **Diacritic-Free Indexing**: Words indexed without diacritical marks for better searching
+- **Responsive Design**: Works beautifully on desktop and mobile devices
 - **Decap CMS**: Content management interface at `/admin/`
-- **Fast Static Site**: Built with Eleventy for optimal performance
+- **Fast Static Site**: Built with Jekyll for optimal performance
 
 ## Setup
 
 ### Prerequisites
-- Node.js (v14 or higher)
+- Ruby (v2.7 or higher)
+- Bundler gem (`gem install bundler`)
 
 ### Installation
 
 1. Install dependencies:
 ```bash
-npm install
+bundle install
 ```
 
-2. Generate verse files from quran-uthmani.txt:
+2. Generate verse and word files from quran-uthmani.txt:
 ```bash
-npm run generate-verses
+ruby scripts/generate-verses.rb
 ```
 
 3. Build the site:
 ```bash
-npm run build
+bundle exec jekyll build
 ```
 
 4. Or serve locally for development:
 ```bash
-npm run serve
+bundle exec jekyll serve
 ```
 
-The site will be available at `http://localhost:8080`
+The site will be available at `http://localhost:4000`
 
 ## Project Structure
 
 ```
-├── src/
-│   ├── _includes/       # Nunjucks templates
-│   │   ├── base.njk     # Base layout
-│   │   └── verse.njk    # Verse page template
-│   ├── admin/           # Decap CMS admin interface
-│   │   ├── config.yml   # CMS configuration
-│   │   └── index.html   # CMS entry point
-│   ├── css/             # Stylesheets
-│   │   └── style.css    # Main styles
-│   ├── verses/          # Generated verse markdown files
-│   └── index.njk        # Home page
+├── _layouts/            # Jekyll layouts
+│   ├── default.html     # Base layout
+│   ├── verse.html       # Verse page template
+│   └── word.html        # Word page template
+├── _verses/             # Generated verse markdown files (6236 files)
+├── _words/              # Generated word markdown files (21106+ files)
+├── admin/               # Decap CMS admin interface
+│   ├── config.yml       # CMS configuration
+│   └── index.html       # CMS entry point
+├── assets/
+│   └── css/
+│       └── style.css    # Main styles
+├── _data/
+│   └── words.json       # Word index data
 ├── scripts/
-│   └── generate-verses.js  # Script to generate verse files
-├── quran-uthmani.txt    # Source Quran text
-├── .eleventy.js         # Eleventy configuration
-└── package.json         # Project dependencies
+│   └── generate-verses.rb  # Script to generate verse and word files
+├── quran-uthmani.txt    # Source Quran text (Uthmani script)
+├── _config.yml          # Jekyll configuration
+└── Gemfile              # Ruby dependencies
 ```
+
+## Generating Content
+
+The `generate-verses.rb` script processes the Quran text and creates:
+- **6,236 verse pages** in `_verses/`
+- **21,106+ word pages** in `_words/`
+- **Word index page** at `/words/`
+- **Word occurrence data** in `_data/words.json`
+
+To regenerate all content:
+```bash
+ruby scripts/generate-verses.rb
+```
+
+## Word Indexing
+
+The word index feature:
+- Removes Arabic diacritical marks (tashkeel) for better word matching
+- Creates individual pages for each unique word
+- Shows all verses containing each word
+- Organizes words alphabetically by Arabic letters
+
+Access the word index at: `/words/`
 
 ## Decap CMS
 
-To use Decap CMS locally:
+The Decap CMS loads directly from CDN and works out of the box.
 
-1. Install the Decap CMS proxy server:
+To use Decap CMS locally with authentication:
+
+1. Run Jekyll server:
 ```bash
-npx decap-server
+bundle exec jekyll serve
 ```
 
-2. Run in a separate terminal:
-```bash
-npm run serve
-```
-
-3. Access the admin at `http://localhost:8080/admin/`
+2. Access the admin at `http://localhost:4000/admin/`
 
 For production deployment with Netlify, configure Git Gateway in Netlify Identity settings.
 
 ## Deployment
 
-This site can be deployed to any static hosting service like Netlify, Vercel, or GitHub Pages.
+This site can be deployed to any static hosting service that supports Jekyll.
 
-For Netlify:
+### Netlify
 1. Connect your repository
-2. Build command: `npm run generate-verses && npm run build`
+2. Build command: `ruby scripts/generate-verses.rb && bundle exec jekyll build`
 3. Publish directory: `_site`
+
+### GitHub Pages
+GitHub Pages supports Jekyll natively. Just push to your repository and enable GitHub Pages in settings.
+
+## Development
+
+Common commands:
+```bash
+# Install dependencies
+bundle install
+
+# Generate verse and word content
+ruby scripts/generate-verses.rb
+
+# Build the site
+bundle exec jekyll build
+
+# Serve locally with live reload
+bundle exec jekyll serve
+
+# Serve with drafts
+bundle exec jekyll serve --drafts
+```
