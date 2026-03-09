@@ -3,7 +3,7 @@
 # Run with: ruby test_remove_arabic_diacritics.rb
 
 require 'test/unit'
-require_relative 'lib/arabic_utils'
+require_relative '../lib/arabic_utils'
 
 class TestRemoveArabicDiacritics < Test::Unit::TestCase
 
@@ -197,6 +197,7 @@ class TestRemoveArabicDiacritics < Test::Unit::TestCase
     assert_equal("حمد", remove_arabic_diacritics("ٱلْحَمْدُ"), "ٱلْحَمْدُ should become حمد")
     assert_equal("عالمين", remove_arabic_diacritics("ٱلْعَـٰلَمِينَ"), "ٱلْعَـٰلَمِينَ should become عالمين")
     assert_equal("باب", remove_arabic_diacritics("ٱلۡبَابِۚ"), "ٱلۡبَابِۚ should become باب")
+    assert_equal("فإطعام", remove_arabic_diacritics("فَإِطۡعَامُ"), "فَإِطۡعَامُ should become فإطعام (no ال prefix)")
   end
 
   def test_fathatan_alef_naseera

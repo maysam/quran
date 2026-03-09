@@ -14,4 +14,5 @@ def remove_arabic_diacritics(text)
     .gsub(/\u0640/, '')                                                   # tatweel (kashida)
     .gsub(/[\u0300-\u036F\u1AB0-\u1AFF\u1DC0-\u1DFF\u20D0-\u20FF\uFE20-\uFE2F]/, '') # combining diacritics
     .gsub(/(^|\s)ال(\S{3,})/) { "#{$1}#{$2}" }                          # strip definite article ال from words ≥5 letters
+    .gsub(/(^|\s)فإ(\S{3,})/) { "#{$1}ا#{$2}" }                          # strip definite article ال from words ≥5 letters
 end
