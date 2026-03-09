@@ -26,3 +26,5 @@ gem "unicode_utils", "~> 1.4"
 
 # Required by Jekyll on Ruby 3.4+ where csv is no longer a default gem
 gem "csv"
+
+gem "base64", "~> 0.3.0"
