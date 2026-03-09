@@ -6,6 +6,9 @@ node_modules
 vendor/
 .bundle/
 
+# Claude Code local config
+.claude/
+
 # Generated content
 _verses/
 _words
@@ -36,7 +39,7 @@ npm-debug.log*
 .jekyll-cache/
 
 # Ruby
-Gemfile.lock
+# Gemfile.lock is committed for reproducible CI builds
 
 # Temporary files
 *.tmp

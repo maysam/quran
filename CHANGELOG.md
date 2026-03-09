@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.9] - 2026-03-09
+
+### Fixed
+- `.gitignore`: removed `Gemfile.lock` from ignored files — it must be committed for reproducible CI/Netlify builds
+- `.gitignore`: added `.claude/` to ignore Claude Code local config files
+- Untracked `.claude/settings.json` and `.claude/settings.local.json` from git index
+- Updated `Gemfile.lock` to include the `csv` gem (added in 2.1.7)
+
 ## [2.1.8] - 2026-03-09
 
 ### Fixed
