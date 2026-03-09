@@ -21,20 +21,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          node-version: '20'
-          cache: 'npm'
+          ruby-version: '3.3'
+          bundler-cache: true
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Generate verses and word index
+        run: ruby scripts/generate-verses.rb
 
-      - name: Generate verses
-        run: npm run generate-verses
-
-      - name: Build site
-        run: npm run build
+      - name: Build Jekyll site
+        run: bundle exec jekyll build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

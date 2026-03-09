@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.1.8] - 2026-03-09
+
+### Fixed
+- Rewrote `.github/workflows/deploy.yml` for Jekyll — it still referenced the old Node.js/npm setup from before the Jekyll migration, causing "lock file not found" errors; now uses `ruby/setup-ruby@v1` with `bundler-cache`, runs `generate-verses.rb`, then `bundle exec jekyll build`
+
+## [2.1.7] - 2026-03-09
+
+### Fixed
+- Added `csv` gem to Gemfile — Ruby 3.4 removed it from default gems, causing `bundle exec jekyll build` to fail on Netlify with `cannot load such file -- csv (LoadError)`
+
 ## [2.1.6] - 2026-03-08
 
 ### Fixed
