@@ -1,3 +1,45 @@
+/* Self-hosted fonts */
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/amiri-400-arabic.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/amiri-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/amiri-700-arabic.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/amiri-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/assets/fonts/inter-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   --primary-color: #1a5f4a;
   --secondary-color: #d4af37;
@@ -537,22 +579,34 @@ footer {
   border-radius: 8px;
   border-left: 3px solid var(--primary-color);
   transition: all 0.3s;
+  font-family: 'Amiri', serif;
+  direction: rtl;
+  text-align: right;
+  font-size: 1.1rem;
+  line-height: 2;
 }
 
 .word-content li:hover {
   background: #f0ede7;
-  transform: translateX(-5px);
   box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
 .word-content a {
+  display: block;
+  margin-top: 0.4rem;
   color: var(--primary-color);
   text-decoration: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
   font-weight: 500;
+  direction: ltr;
+  text-align: left;
+  opacity: 0.75;
 }
 
 .word-content a:hover {
   text-decoration: underline;
+  opacity: 1;
 }
 
 /* Alphabet index page */

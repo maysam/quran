@@ -199,40 +199,69 @@ FileUtils.mkdir_p(words_dir)
 puts "\nGenerating word pages..."
 word_count = 0
 
+occurrences_per_page = 20
+
 word_index.each do |word, occurrences|
-  # Generate consistent slug for the word
   slug = word_to_slug(word)
-
-  original_word = word
-  # Build the occurrences list
-  occurrences_markdown = occurrences.map do |occ|
-    original_word = occ[:original_word]
-    "- [Surah #{occ[:surah_name]} (#{occ[:surah_number]}:#{occ[:verse_in_surah]})](#{occ[:path]})\n#{occ[:escaped_text]}"
-  end.join("\n")
-
-  # Escape word for YAML
   escaped_word = word.gsub('"', '\\"')
+  total_occurrences = occurrences.length
+  total_pages = (total_occurrences.to_f / occurrences_per_page).ceil
+  original_word = occurrences.first[:original_word]
 
-  markdown = <<~MARKDOWN
-    ---
-    title: "Word: #{escaped_word}"
-    word: "#{escaped_word}"
-    occurrences: #{occurrences.length}
-    layout: word
-    permalink: /words/#{slug}/
-    ---
+  (1..total_pages).each do |page_num|
+    page_occurrences = occurrences.slice((page_num - 1) * occurrences_per_page, occurrences_per_page)
 
-    # #{original_word}
+    occurrences_markdown = page_occurrences.map do |occ|
+      "- #{occ[:escaped_text]}\n  [#{occ[:surah_name]} #{occ[:surah_number]}:#{occ[:verse_in_surah]}](#{occ[:path]})"
+    end.join("\n")
 
-    This word appears **#{occurrences.length} time#{'s' if occurrences.length != 1}** in the Quran.
+    # Build pagination HTML
+    pagination_html = if total_pages > 1
+      prev_url = page_num > 1 ? (page_num == 2 ? "/words/#{slug}/" : "/words/#{slug}/page/#{page_num - 1}/") : nil
+      next_url = page_num < total_pages ? "/words/#{slug}/page/#{page_num + 1}/" : nil
+      prev_link = prev_url ? "<a href=\"#{prev_url}\" class=\"page-link prev\">← Previous</a>" : '<span class="page-link disabled">← Previous</span>'
+      next_link = next_url ? "<a href=\"#{next_url}\" class=\"page-link next\">Next →</a>" : '<span class="page-link disabled">Next →</span>'
+      "<div class=\"pagination\">#{prev_link}<span class=\"page-info\">Page #{page_num} of #{total_pages}</span>#{next_link}</div>"
+    else
+      ''
+    end
 
-    ## Occurrences
+    permalink = page_num == 1 ? "/words/#{slug}/" : "/words/#{slug}/page/#{page_num}/"
 
-    #{occurrences_markdown}
-  MARKDOWN
+    markdown = <<~MARKDOWN
+      ---
+      title: "Word: #{escaped_word}"
+      word: "#{escaped_word}"
+      occurrences: #{total_occurrences}
+      layout: word
+      permalink: #{permalink}
+      pagination_html: "#{pagination_html.gsub('"', '\\"')}"
+      ---
 
-  file_path = File.join(words_dir, "#{slug}.md")
-  File.write(file_path, markdown, encoding: 'utf-8')
+      # #{original_word}
+
+      This word appears **#{total_occurrences} time#{'s' if total_occurrences != 1}** in the Quran.
+
+      #{pagination_html}
+
+      ## Occurrences
+
+      #{occurrences_markdown}
+
+      #{pagination_html}
+    MARKDOWN
+
+    if page_num == 1
+      file_path = File.join(words_dir, "#{slug}.md")
+    else
+      page_dir = File.join(words_dir, slug, 'page', page_num.to_s)
+      FileUtils.mkdir_p(page_dir)
+      file_path = File.join(page_dir, 'index.md')
+    end
+
+    File.write(file_path, markdown, encoding: 'utf-8')
+  end
+
   word_count += 1
 end
 

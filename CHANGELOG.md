@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.2.4] - 2026-03-09
+
+### Changed
+- Word occurrence list: surah reference now appears as a small caption below the verse text instead of a link above it
+- Verse page surah navigation: replaced `⏮`/`⏭` emoji with `↑ Start of Surah`, `All Surahs`, `Next Surah →`; removed redundant bottom verse navigation bar
+- Word page navigation: consolidated to `Home` + `Word Index` at top, `← Word Index` at bottom; removed duplicate buttons
+
+## [2.2.3] - 2026-03-09
+
+### Changed
+- Fonts are now self-hosted in `assets/fonts/` — removed Google Fonts external dependency; `@font-face` declarations added to `style.css`; downloaded Amiri (arabic + latin subsets, 400 + 700) and Inter (latin, 400–600)
+
+## [2.2.2] - 2026-03-09
+
+### Fixed
+- Word page occurrence list items now use `font-family: 'Amiri', serif` with `direction: rtl` — fixes Chrome rendering of Extended Arabic Unicode characters (e.g. `ࣱ` U+08F1) that Chrome's default system Arabic font doesn't support but Amiri does; Safari was unaffected as it uses a different font fallback chain
+
+## [2.2.1] - 2026-03-09
+
+### Added
+- Word occurrence pages are now paginated at 20 rows per page; words with more than 20 occurrences get `/words/{slug}/page/2/`, `/page/3/`, etc. with Previous/Next navigation
+
 ## [2.2.0] - 2026-03-09
 
 ### Fixed
