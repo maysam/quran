@@ -122,7 +122,7 @@ class TestRemoveArabicDiacritics < Test::Unit::TestCase
 
   def test_quranic_verse_example
     input = "ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ"
-    expected = "لحمد لله رب لعالمين"
+    expected = "حمد لله رب عالمين"
     result = remove_arabic_diacritics(input)
     assert_equal(expected, result, "Should handle Quranic verse with various diacritics")
   end
@@ -187,6 +187,13 @@ class TestRemoveArabicDiacritics < Test::Unit::TestCase
     # ࣱ (open dammatan U+08F1) is stripped with no trailing alef
     assert_equal("نصیب", remove_arabic_diacritics("نَصِیبࣰا"), "نَصِیبࣰا should become نصیب")
     assert_equal("نصیب", remove_arabic_diacritics("نَصِیبࣱ"),  "نَصِیبࣱ should become نصیب")
+  end
+
+  def test_uthmani_alef_lam_sukun
+    # ٱلۡ (alef wasla + lam + Quranic sukun) is the Uthmani definite article → strip from words ≥5 letters
+    assert_equal("مجیبون", remove_arabic_diacritics("ٱلۡمُجِیبُونَ"), "ٱلۡمُجِیبُونَ should become مجیبون")
+    assert_equal("حمد", remove_arabic_diacritics("ٱلْحَمْدُ"), "ٱلْحَمْدُ should become حمد")
+    assert_equal("عالمين", remove_arabic_diacritics("ٱلْعَـٰلَمِينَ"), "ٱلْعَـٰلَمِينَ should become عالمين")
   end
 
   def test_fathatan_alef_naseera

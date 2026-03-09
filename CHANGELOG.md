@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.2.0] - 2026-03-09
+
+### Fixed
+- `remove_arabic_diacritics` now normalizes Uthmani `ٱلۡ` (alef wasla + lam + Quranic sukun, U+0671+U+0644+U+06E1) to standard `ال` before stripping, so `ٱلۡمُجِیبُونَ` → `مجیبون` instead of `لمجیبون`
+
 ## [2.1.9] - 2026-03-09
 
 ### Fixed
