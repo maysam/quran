@@ -198,6 +198,8 @@ class TestRemoveArabicDiacritics < Test::Unit::TestCase
     assert_equal("عالمين", remove_arabic_diacritics("ٱلْعَـٰلَمِينَ"), "ٱلْعَـٰلَمِينَ should become عالمين")
     assert_equal("باب", remove_arabic_diacritics("ٱلۡبَابِۚ"), "ٱلۡبَابِۚ should become باب")
     assert_equal("اطعام", remove_arabic_diacritics("فَإِطۡعَامُ"), "فَإِطۡعَامُ should become فإطعام (no ال prefix)")
+    assert_equal("سراج", remove_arabic_diacritics("سِرَ ٰ⁠جࣰا"), "سِرَ ٰ⁠جࣰا should become سراج")
+    assert_equal("واحد", remove_arabic_diacritics("وَ ٰ⁠حِدࣲ"), "وَ ٰ⁠حِدࣲ should become وحِد")
   end
 
   def test_fathatan_alef_naseera

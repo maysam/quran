@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.7] - 2026-03-09
+
+### Fixed
+- `remove_arabic_diacritics`: handle U+200A (hair space) + U+0670 (superscript alef) → `ا`, covering Uthmani script patterns like `سِرَ ٰ⁠جࣰا → سراج` and `وَ ٰ⁠حِدࣲ → واحد`
+- `remove_arabic_diacritics`: strip U+2060 (word joiner) which appears between the superscript alef and the following letter in these patterns
+
 ## [2.2.6] - 2026-03-09
 
 ### Fixed
