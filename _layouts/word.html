@@ -3,21 +3,7 @@ layout: default
 ---
 
 <article class="word-page">
-  <div class="word-header">
-    <h1 class="word-title">{{ page.word }}</h1>
-    <p class="word-stats">Found in {{ page.occurrences }} verse{% if page.occurrences != 1 %}s{% endif %}</p>
-  </div>
-
-  <div class="word-navigation">
-    <a href="/" class="nav-link">Home</a>
-    <a href="/words/" class="nav-link">Word Index</a>
-  </div>
-
   <div class="word-content">
     {{ content }}
-  </div>
-
-  <div class="word-navigation bottom">
-    <a href="/words/" class="nav-link">← Word Index</a>
   </div>
 </article>

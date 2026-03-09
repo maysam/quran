@@ -129,7 +129,7 @@ class TestRemoveArabicDiacritics < Test::Unit::TestCase
 
   def test_complex_quranic_text
     input = "وَٱللَّهُ خَلَقَ كُلَّ دَابَّةٍ مِّن مَّاءٍ ۖ فَمِنْهُم مَّن يَمْشِي عَلَىٰ بَطْنِهِۦ وَمِنْهُم مَّن يَمْشِي عَلَىٰ رِجْلَيْنِ وَمِنْهُم مَّن يَمْشِي عَلَىٰ أَرْبَعٍ ۚ يَخْلُقُ ٱللَّهُ مَا يَشَاءُ ۚ إِنَّ ٱللَّهَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ"
-    expected = "ولله خلق كل دابة من ماء  فمنهم من يمشي على بطنه ومنهم من يمشي على رجلين ومنهم من يمشي على أربع  يخلق لله ما يشاء  إن لله على كل شيء قدير"
+    expected = "والله خلق كل دابة من ماء  فمنهم من يمشي على بطنه ومنهم من يمشي على رجلين ومنهم من يمشي على أربع  يخلق الله ما يشاء  إن الله على كل شيء قدير"
     result = remove_arabic_diacritics(input)
     assert_equal(expected, result, "Should handle complex Quranic verse with extensive diacritics")
   end
@@ -157,10 +157,10 @@ class TestRemoveArabicDiacritics < Test::Unit::TestCase
 
   def test_rahman_tatweel_superscript_alef
     # ـٰ (tatweel + superscript alef) should become ا to preserve the long vowel
-    # ٱل (alef wasla + lam) → ل (alef wasla stripped, bare lam remains)
+    # ٱل (alef wasla + lam) → ال (normalized to standard alef + lam), then ال stripped from ≥5-letter words
     input = "ٱلرَّحۡمَـٰنِ"
     result = remove_arabic_diacritics(input)
-    assert_equal("لرحمان", result, "ٱلرَّحۡمَـٰنِ should become لرحمان (alef wasla stripped, ـٰ → ا)")
+    assert_equal("رحمان", result, "ٱلرَّحۡمَـٰنِ should become رحمان (ٱل normalized to ال then stripped, ـٰ → ا)")
   end
 
   def test_strip_al_prefix_long_word
@@ -168,6 +168,8 @@ class TestRemoveArabicDiacritics < Test::Unit::TestCase
     assert_equal("رحمان", remove_arabic_diacritics("الرَّحْمَـٰنِ"), "الرحمن → رحمان")
     assert_equal("رحيم", remove_arabic_diacritics("الرَّحِيمِ"), "الرحيم → رحيم")
     assert_equal("سلام", remove_arabic_diacritics("السَّلَامُ"), "السلام → سلام")
+    # ٱل (alef wasla + lam without sukun) should also normalize and strip
+    assert_equal("طین", remove_arabic_diacritics("ٱلطِّینِ"), "ٱلطِّینِ should become طین")
   end
 
   def test_preserve_al_prefix_short_word

@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.2.6] - 2026-03-09
+
+### Fixed
+- `remove_arabic_diacritics`: `ٱل` (alef wasla + lam) without sukun (e.g. `ٱلطِّینِ`) now correctly normalizes to `ال` before ال-stripping — previously only `ٱلۡ` (with sukun) was handled, leaving a bare `ل` (e.g. `لطین` instead of `طین`)
+- Updated test suite: corrected two outdated expected values and added `ٱلطِّینِ → طین` test case
+
+## [2.2.5] - 2026-03-09
+
+### Added
+- Word occurrence pages: target word is now highlighted in red (`color: #c0392b; font-weight: 700`) within each verse using `<span class="word-highlight">`, matched via diacritics-free comparison
+- Mobile responsive improvements: added comprehensive `@media (max-width: 768px)` and `@media (max-width: 480px)` rules covering all page types (home, verse, word, surahs, alphabet, letter pages)
+
+### Fixed
+- Word occurrence verses now render inline (horizontal Arabic text) instead of vertically — `.word-content a` changed from `display: block` to inline; only surah caption links use `display: block` via `.surah-caption` class
+- `highlight_word_in_verse` function rewritten to use `gsub` regex instead of `split(' ')`, which was incorrectly splitting inside `<a href='...'>` attributes
+
 ## [2.2.4] - 2026-03-09
 
 ### Changed

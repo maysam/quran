@@ -7,6 +7,21 @@ def word_to_slug(word)
   word
 end
 
+# Highlight occurrences of target_slug word within verse text HTML
+# Wraps matching anchor tags (by diacritics-free comparison) with a highlight span
+def highlight_word_in_verse(verse_html, target_slug)
+  verse_html.gsub(/<a href='([^']*)'>(.*?)<\/a>/) do
+    href = $1
+    original_word = $2
+    cleaned = remove_arabic_diacritics(original_word)
+    if cleaned == target_slug
+      "<a href='#{href}'><span class=\"word-highlight\">#{original_word}</span></a>"
+    else
+      "<a href='#{href}'>#{original_word}</a>"
+    end
+  end
+end
+
 
 # Surah data: [name, verseCount]
 surah_data = [
@@ -118,26 +133,30 @@ lines.each_with_index do |line, index|
 
   words = line.split(' ')
 
-  # Collect all words for index
+  # Build word links first (needed for both verse page and word index)
   word_links = words.map do |original_word|
     word = remove_arabic_diacritics(original_word)
-    next if word.strip.empty? # Skip empty words
+    next if word.strip.empty?
+    url = "/words/#{word_to_slug(word)}/"
+    [word, "<a href='#{url}'>#{original_word}</a>"]
+  end.compact
 
-    word_index[word] ||= []
-    word_index[word] << {
-      original_word: original_word,
+  word_text = word_links.map { |_, link| link }.join(" ")
+
+  # Collect all words for index
+  word_links.each do |cleaned_word, _link|
+    word_index[cleaned_word] ||= []
+    word_index[cleaned_word] << {
+      original_word: words.find { |w| remove_arabic_diacritics(w) == cleaned_word } || cleaned_word,
       verse_number: verse_number,
       escaped_text: escaped_text,
+      word_text: word_text,
       verse_in_surah: surah_info[:verse_in_surah],
       surah_number: surah_info[:surah_number],
       surah_name: surah_info[:surah_name],
       path: "/surah/#{surah_info[:surah_number]}/#{surah_info[:verse_in_surah]}/"
     }
-    url = "/words/#{word_to_slug(word)}/"
-    "<a href='#{url}'>#{original_word}</a>"
-  end.compact
-
-  word_text = word_links.join(" ")
+  end
 
   # Create markdown file with frontmatter
   slug = "verse-#{verse_number.to_s.rjust(4, '0')}"
@@ -211,9 +230,11 @@ word_index.each do |word, occurrences|
   (1..total_pages).each do |page_num|
     page_occurrences = occurrences.slice((page_num - 1) * occurrences_per_page, occurrences_per_page)
 
-    occurrences_markdown = page_occurrences.map do |occ|
-      "- #{occ[:escaped_text]}\n  [#{occ[:surah_name]} #{occ[:surah_number]}:#{occ[:verse_in_surah]}](#{occ[:path]})"
-    end.join("\n")
+    occurrences_html = "<ul>\n" + page_occurrences.map do |occ|
+      highlighted_verse = highlight_word_in_verse(occ[:word_text], word)
+      surah_label = "#{occ[:surah_name]} #{occ[:surah_number]}:#{occ[:verse_in_surah]}"
+      "  <li>#{highlighted_verse}\n    <a href=\"#{occ[:path]}\" class=\"surah-caption\">#{surah_label}</a>\n  </li>"
+    end.join("\n") + "\n</ul>"
 
     # Build pagination HTML
     pagination_html = if total_pages > 1
@@ -246,7 +267,7 @@ word_index.each do |word, occurrences|
 
       ## Occurrences
 
-      #{occurrences_markdown}
+      #{occurrences_html}
 
       #{pagination_html}
     MARKDOWN
