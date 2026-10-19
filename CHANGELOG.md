@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.5.1] - 2026-10-19
+
+### Fixed
+- `ٱصۡطَفَیۡتُكَ` was not recognised: it is now `اصطفی` + postfix `تك` on the weight اِفْتَعَلَ, root ص ف و (the same root page as اصطفى، یصطفی، مصطفی، أصفى، صفوان)
+- Form VIII (اِفْتَعَلَ) with an assimilated ت: the ت becomes ط after ص ض ط ظ (اصطفى ← صفو, اصطبر ← صبر, اضطر ← ضرر, اطّلع ← طلع) and د after د ذ ز (ازداد ← زید, ادّعى ← دعو, مدّكر ← ذكر); previously these were unrecognised or got ط as a root letter (صطف)
+- Added the passive اُفْتُعِلَ (ٱضۡطُرَّ, ٱزۡدُجِرَ)
+- The imperfect prefixes ی ت ن أ only take fatha or damma, so `نِصۡف` (half, root نصف) is no longer read as a verb from صفو
+- Roots matching the Quranic Arabic Corpus: 95.14% → 95.27%
+
 ## [2.5.0] - 2026-10-19
 
 ### Added

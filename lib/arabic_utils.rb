@@ -123,7 +123,7 @@ ARABIC_IMPERFECT_PREFIXES = %w[ی ت ن أ].freeze
 ARABIC_WEIGHT_TEMPLATES = [
   # bare Form I (active and passive) and the derived verb forms in the perfect
   'فعل', 'فَعَل', 'فُعِل', 'فَعْل', 'فِعْل', 'فُعْل', 'فَعَّل', 'فُعِّل', 'فَعِّل', 'فَاعَل', 'أَفْعَل', 'تَفَعَّل', 'تَفَاعَل',
-  'اِنْفَعَل', 'اِفْتَعَل', 'اِسْتَفْعَل', 'اِفْعَلّ',
+  'اِنْفَعَل', 'اِفْتَعَل', 'اُفْتُعِل', 'اِسْتَفْعَل', 'اِفْعَلّ',
   # Form V/VI with the ت assimilated into the first radical (ٱطَّهَّرُوا, ٱدَّارَكُوا)
   'اِفَّعَّل', 'اِفَّاعَل', 'مُفَّعِّل', 'مُفَّعَّل',
   # participles
@@ -369,14 +369,18 @@ ARABIC_IMPERATIVE_IRREGULARS = %w[كل خذ].freeze # never preceded by the inte
 # Radicals are numbered on the unexpanded template so a shadda doubles the same radical.
 def compile_arabic_weight_template(template, weak_middle: false, imperfect: false)
   literal_lam_count = 0
-  template_slots = parse_arabic_letter_units(template).each_with_index.map do |template_unit, unit_index|
+  template_units = parse_arabic_letter_units(template)
+  template_slots = template_units.each_with_index.map do |template_unit, unit_index|
     slot = case template_unit.letter
            when 'ف' then { radical: 0 }
            when 'ع' then weak_middle ? { radical: 1, weak_only: true } : { radical: 1 }
            when 'ل'
              literal_lam_count += 1
              { radical: literal_lam_count == 1 ? 2 : 3 }
-           else { fixed: template_unit.letter, imperfect_prefix: imperfect && unit_index == 0 }
+           else
+             { fixed: template_unit.letter, imperfect_prefix: imperfect && unit_index == 0,
+               # the ت of اِفْتَعَلَ right after the first radical, which may assimilate to it
+               form_viii_infix: template_unit.letter == 'ت' && unit_index > 0 && template_units[unit_index - 1].letter == 'ف' }
            end
     slot.merge(vowel: template_unit.vowel, shadda: template_unit.shadda)
   end
@@ -430,8 +434,17 @@ def arabic_radical_letter(letter)
   letter
 end
 
-# Match stem units against a compiled weight. Returns nil, or
-#   [score, root, ambiguous weak radical indexes, written weak radical indexes, hamza carrier read?]
+# The ت of اِفْتَعَلَ assimilates to an emphatic or dental first radical: it becomes ط after ص ض ط ظ
+# (اِصۡطَفَى ← صفو, اِضۡطُرَّ ← ضرر, اِطَّلَعَ ← طلع) and د after د ذ ز (اِزۡدَادَ ← زید, اِدَّعَى ← دعو)
+def arabic_form_viii_infix_letter(first_radical)
+  return 'ط' if %w[ص ض ط ظ].include?(first_radical)
+  return 'د' if %w[د ذ ز].include?(first_radical)
+  'ت'
+end
+
+# Match stem units against a compiled weight. Returns nil, or a hash with the :score, the :root
+# (radicals as written), the radical indexes whose weak letter is ambiguous (:weak_radical_indexes) or
+# written (:written_weak_indexes), and whether a hamza carrier was read as the first radical.
 # Fixed letters of the weight explain the word and earn points; clashing vowels rule the weight out.
 def match_arabic_weight(stem_units, weight_definition)
   template_slots = weight_definition[:slots]
@@ -446,7 +459,10 @@ def match_arabic_weight(stem_units, weight_definition)
   template_slots.each_with_index do |slot, slot_index|
     stem_unit = stem_units[slot_index]
     if slot[:fixed]
-      return nil unless arabic_letters_equivalent?(slot[:fixed], stem_unit.letter)
+      expected_letter = slot[:form_viii_infix] ? arabic_form_viii_infix_letter(radicals[0]) : slot[:fixed]
+      return nil unless arabic_letters_equivalent?(expected_letter, stem_unit.letter)
+      # the imperfect prefixes ی ت ن أ take fatha or damma, never kasra (نِصۡف is no verb)
+      return nil if slot[:imperfect_prefix] && stem_unit.vowel == :kasra
       # ت/ن/أ also begin many roots, so as imperfect prefixes they prove less than the very common ی
       match_score += slot[:imperfect_prefix] && stem_unit.letter != 'ی' ? 1 : 2
     else
@@ -511,7 +527,14 @@ def match_arabic_weight(stem_units, weight_definition)
     return nil if radicals.each_cons(2).any? { |left_radical, right_radical| left_radical == right_radical }
     match_score -= 4 # prefer triliteral roots
   end
-  [match_score, radicals.join, weak_radical_indexes.uniq, written_weak_indexes.uniq, hamza_carrier_read]
+  root = radicals.join
+  # ذ + ت merges into دّ (مُدَّكِر ← ذكر): a doubled د before the assimilated ت may stand for ذ
+  if root.start_with?('د') && stem_units.first(3).any?(&:from_shadda) && template_slots.any? { |slot| slot[:form_viii_infix] } &&
+     !ARABIC_COMMON_ROOTS[root] && ARABIC_COMMON_ROOTS["ذ#{root[1..]}"]
+    root = "ذ#{root[1..]}"
+  end
+  { score: match_score, root: root, weak_radical_indexes: weak_radical_indexes.uniq,
+    written_weak_indexes: written_weak_indexes.uniq, hamza_carrier_read: hamza_carrier_read }
 end
 
 # Weak radicals are ambiguous on the surface (قَالَ ← قول, بَاعَ ← بیع; سَمَاۤء ← سمو), so each one
@@ -766,10 +789,11 @@ def compute_arabic_word_analysis(word)
         match_result = match_arabic_weight(expanded_stem_units, weight_definition)
         next unless match_result
 
-        weight_score, radicals, weak_radical_indexes, written_weak_indexes, hamza_carrier_read = match_result
-        root_reading = arabic_best_root_reading(radicals, weak_radical_indexes, written_weak_indexes)
+        root_reading = arabic_best_root_reading(match_result[:root], match_result[:weak_radical_indexes],
+                                                match_result[:written_weak_indexes])
+        weight_score = match_result[:score]
         # ءَا read as أَأۡ (ءَامَنَ ← أمن) only for known roots; ءَایَـٰت is a plural in ات, not أَفْعَال
-        weight_score -= 3 if hamza_carrier_read && !ARABIC_COMMON_ROOTS[root_reading]
+        weight_score -= 3 if match_result[:hamza_carrier_read] && !ARABIC_COMMON_ROOTS[root_reading]
         consider_analysis.call(
           score: weight_score + affix_score + arabic_root_bonus(root_reading),
           root: root_reading, stem: arabic_stem_text(stem_units, suffix_text),

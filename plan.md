@@ -96,10 +96,15 @@
 - [x] Shared `write_occurrence_pages` for root and form lists; `form:` front matter
 - [x] Fixed invisible "Next →" label on word pages; verified in the browser (desktop and mobile)
 
+### Corrections: Form VIII Assimilation (اصطفیتك)
+- [x] `ٱصۡطَفَیۡتُكَ` → `اصطفی` + `تك`, root ص ف و (ط is the assimilated ت of اِفْتَعَلَ, not a root letter)
+- [x] ت → ط after ص ض ط ظ, ت → د after د ذ ز; passive اُفْتُعِلَ; ذ + ت → دّ read as ذ (مُدَّكِر)
+- [x] Imperfect prefixes never take kasra (نِصۡف stays نصف)
+
 ## Current Prompt
-**Task**: clicking on word-forms should also filter by them
-- Each word form of a root got its own paginated list at `/words/<root>/<form>/`; the chips are links with an active state and an "All" chip
-- Only the selected form is highlighted in the verses; content regenerated and the Jekyll build verified (2,382 roots, 5,235 form lists)
+**Task**: corrections — ص ط ف is the root for اصطفیتك but it was not recognized; it has a postfix and the rest is one word coming from root
+- `ٱصۡطَفَیۡتُكَ` is now recognised as `اصطفی` + postfix `تك`; its root is ص ف و (اِفْتَعَلَ, whose ت became ط after ص — the corpus agrees), so it joins اصطفى، یصطفی، مصطفی on one page
+- The whole family of assimilated Form VIII words was fixed (صبر، ضرر، صنع، زید، دعو، ذكر …), plus the kasra rule for imperfect prefixes
 
 ## Project Structure
 ```

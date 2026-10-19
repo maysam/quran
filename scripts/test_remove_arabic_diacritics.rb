@@ -261,6 +261,7 @@ class TestRemoveArabicDiacritics < Test::Unit::TestCase
     assert_equal("لیس", remove_arabic_diacritics("لَیۡسَ"), "ی with sukun is a diphthong, not the long vowel of a hollow weight")
     assert_equal("یسر", remove_arabic_diacritics("یَسِیرࣱ"), "tanwin marks a noun (فَعِیل), never an imperfect verb")
     assert_equal("ربب", remove_arabic_diacritics("رَبَّكَ"), "a doubled letter before a pronoun is a geminate root")
+    assert_equal("نصف", remove_arabic_diacritics("نِصۡفُ"), "an imperfect prefix never takes kasra, so نِصۡف is no verb from صفو")
   end
 
   def test_roots_of_weights
@@ -270,6 +271,16 @@ class TestRemoveArabicDiacritics < Test::Unit::TestCase
       "ٱلصَّلَوٰةَ" => "صلو", "لِّلۡمُتَّقِینَ" => "وقی", "یَهۡتَدُونَ" => "هدی", "ءَامَنُوا۟" => "أمن",
       "إِیمَـٰنࣰا" => "أمن", "تَوَلَّوۡا۟" => "ولی", "یَذَّكَّرُونَ" => "ذكر", "ٱتَّبِعُوا۟" => "تبع"
     }.each { |word, root| assert_equal(root, arabic_word_root(word), word) }
+  end
+
+  def test_form_viii_infix_assimilates_to_the_first_radical
+    # the ت of اِفْتَعَلَ becomes ط after ص ض ط ظ and د after د ذ ز: it belongs to the weight, not the root
+    assert_equal("صفو", remove_arabic_diacritics("ٱصۡطَفَیۡتُكَ"), "ٱصۡطَفَیۡتُكَ = اصطفی + تك, root ص ف و")
+    assert_equal("اصطفی", remove_arabic_diacritics("ٱصۡطَفَیۡتُكَ", root: false))
+    {
+      "ٱصۡطَفَىٰ" => "صفو", "یَصۡطَفِی" => "صفو", "ٱلۡمُصۡطَفَیۡنَ" => "صفو", "ٱصۡطَبِرۡ" => "صبر",
+      "ٱضۡطُرَّ" => "ضرر", "ٱطَّلَعَ" => "طلع", "ٱزۡدَادُوا۟" => "زید", "ٱدَّعَى" => "دعو", "مُّدَّكِرࣲ" => "ذكر"
+    }.each { |word, root| assert_equal(root, remove_arabic_diacritics(word), word) }
   end
 
   def test_particles_and_special_words

@@ -99,7 +99,8 @@ The word is split into letters with their vowels; prefixes are peeled off only w
 (بِ with kasra, وَ/فَ with fatha, the article with a silent or sukun lam …); the stem is matched
 against vowelized weights built on ف ع ل (فَاعِل, مَفْعُول, أَفْعَل, اِسْتَفْعَلَ, یَفْعُلُ, hollow, defective,
 geminate and assimilated variants). A weight whose vowels clash with the word is ruled out, a long
-vowel must match the vowel before it, and tanwin or the article rule out verb weights. A list of
+vowel must match the vowel before it, an imperfect prefix never takes kasra, tanwin or the article rule
+out verb weights, and the ت of اِفْتَعَلَ may appear as ط or د (اِصۡطَفَى ← ص ف و). A list of
 frequent Quranic roots breaks ties between equally good readings (قال → قول, not قیل).
 
 ```ruby
@@ -111,7 +112,7 @@ analyze_arabic_word("بِـَٔایَـٰتِنَا")
 ```
 
 Measured against the Quranic Arabic Corpus segmentation: prefixes are stripped correctly for 99.4% of
-words, postfixes for 96.8%, and 95.1% of root-bearing words get the corpus root.
+words, postfixes for 96.9%, and 95.3% of root-bearing words get the corpus root.
 
 Run the tests with `ruby scripts/test_remove_arabic_diacritics.rb`.
 
