@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.5.2] - 2026-10-19
+
+### Fixed
+- `فَخُورٌ` now gets its root فخر (weight فَعُول) instead of being split into فَ + خُور and swapped to خیر
+- The long vowel of a hollow weight follows its vowel: after damma it is always و (یَقُولُ ← قول), after fatha or kasra it may be و or ی (قَالَ ← قول, بَاعَ ← بیع), and it is never a hamza (`وَسِیلَة` → وسل, not سأل)
+- Weak-letter alternatives are now kept per radical position (`weak_alternatives`), so each position only offers the letters it can really stand for
+- `سَوۡفَ` is a particle (`فَسَوۡفَ` → فَ + سوف); فخر added to the common roots
+- Accuracy against the Quranic Arabic Corpus: prefixes 99.44% → 99.47%, roots 95.27% → 95.29%
+
 ## [2.5.1] - 2026-10-19
 
 ### Fixed

@@ -84,7 +84,7 @@ ARABIC_ROOT_YA = 'ی'    # the corpus writes ya as Persian ی; keep roots consis
 ARABIC_PARTICLE_ENTRIES = %w[
   من فِی عَن مَع لَدُن مَا لَا لَم لَن لَمّا لَو لَولا لَوما إِلّا أَلّا أَمَا
   إِن إِنّ أَن أَنّ إِنّما أَنّما كَأَنّ كَأَن كَأَنّما لَكِن لَكِنّ لَاكِن=لكن لَاكِنّ=لكنّ لَعَلّ لَیت
-  أَو أَم إِمّا أَمّا ثُمّ ثَمّ قَد هَل بَل إِذ إِذَا كَی كَیلا ءِن=إن ءِنّ=إنّ م=ما كَم كَلّا كَأَیّن یَا ممّا ممّن عَمّا فِیما كُلّما أَینما حَیثما مَاذا أَین أَیّان
+  أَو أَم إِمّا أَمّا ثُمّ ثَمّ قَد هَل بَل إِذ إِذَا كَی كَیلا ءِن=إن ءِنّ=إنّ م=ما كَم كَلّا كَأَیّن سَوف یَا ممّا ممّن عَمّا فِیما كُلّما أَینما حَیثما مَاذا أَین أَیّان
   الّذی الّتی الّذین الّذان الّتان الّاتی=اللاتی الّاءی=اللائی
   هاذا=هذا هاذه=هذه هاذان=هذان هاذین=هذین هاؤلاء=هؤلاء ذالك=ذلك ذالكم=ذلكم ذالكما=ذلكما تلك تلكم تلكما
   ألاءك=أولئك ألاء=أولاء ألوا=أولو ألی=أولی ألات=أولات ذا ذو ذی ذات ذوا
@@ -204,7 +204,7 @@ ARABIC_COMMON_ROOTS = %w[
   طرف طعم طغی طفل طلب طلق طمع طهر طوع طوف طول طیب طیر ظلل ظلم ظنن ظهر عبث عبد عبر عتد عجب عجز عجل
   عدد عدل عدو عذب عذر عرب عرش عرض عرف عزز عزم عسر عشر عصم عصو عصی عطو عظم عفو عقب عقد عقل علق علم
   علن علو عمد عمر عمل عمی عنت عهد عود عوذ عون عیش عین غرب غرر غرق غشی غضب غفر غفل غلب غلظ غلل غلو
-  غنم غنی غوی غیب غیر فتح فتن فتی فجر فحش فرح فرد فرض فرق فری فسد فسق فصل فضل فطر فعل فقد فقر فقه
+  غنم غنی غوی غیب غیر فتح فتن فتی فجر فحش فخر فرح فرد فرض فرق فری فسد فسق فصل فضل فطر فعل فقد فقر فقه
   فكر فكه فلح فلك فوز فوق قبح قبر قبل قتل قدر قدم قرأ قرب قرض قرن قری قسط قسم قصد قصر قصص قضی قطع
   قعد قلب قلل قمر قنت قهر قوت قول قوم قوی كبر كتب كتم كثر كذب كرم كره كسب كشف كظم كفر كفف كفل كفی
   كلب كلل كلم كمل كنز كون كید لبث لبس لحق لحم لدن لزم لسن لطف لعب لعن لغو لفظ لقی لمس لهو لوم لیل
@@ -443,8 +443,9 @@ def arabic_form_viii_infix_letter(first_radical)
 end
 
 # Match stem units against a compiled weight. Returns nil, or a hash with the :score, the :root
-# (radicals as written), the radical indexes whose weak letter is ambiguous (:weak_radical_indexes) or
-# written (:written_weak_indexes), and whether a hamza carrier was read as the first radical.
+# (radicals as written), the letters each ambiguous weak radical may also be (:weak_alternatives,
+# radical index => letters), the radical indexes holding a written و/ی (:written_weak_indexes), and
+# whether a hamza carrier was read as the first radical.
 # Fixed letters of the weight explain the word and earn points; clashing vowels rule the weight out.
 def match_arabic_weight(stem_units, weight_definition)
   template_slots = weight_definition[:slots]
@@ -453,7 +454,7 @@ def match_arabic_weight(stem_units, weight_definition)
 
   radicals = []
   hamza_carrier_read = false
-  weak_radical_indexes = []    # read from a long alef, alef maqsura, hamza or implied: may be any weak letter
+  weak_alternatives = {}       # radical index => letters it may also be (a long alef, alef maqsura, hamza, implied …)
   written_weak_indexes = []    # a written و/ی: may only be its twin (ٱلۡقِیَـٰمَة ← قوم, ٱلرِّیَـٰح ← روح)
   match_score = 0
   template_slots.each_with_index do |slot, slot_index|
@@ -467,6 +468,7 @@ def match_arabic_weight(stem_units, weight_definition)
       match_score += slot[:imperfect_prefix] && stem_unit.letter != 'ی' ? 1 : 2
     else
       radical_index = slot[:radical]
+      preceding_vowel = slot_index > 0 ? stem_units[slot_index - 1].vowel : nil
       return nil if stem_unit.silent || stem_unit.letter == 'ة' # unpronounced letters and taa marbuta are never radicals
       # a long vowel right after a hamza at the start is the root's own hamza: ءَامَنَ (أَأۡمَنَ), إِیمَـٰن, أُوتُوا۟
       root_hamza_carrier = radical_index == 0 && slot_index > 0 && stem_unit.vowel.nil? && %w[ا ی و].include?(stem_unit.letter) &&
@@ -476,7 +478,6 @@ def match_arabic_weight(stem_units, weight_definition)
         # a long vowel letter carries no vowel of its own and echoes the vowel before it:
         # fatha + ا (قَالَ), kasra + ی (قِیلَ), damma + و (یَقُولُ); لَیۡسَ has a diphthong, not a long vowel
         return nil unless ARABIC_WEAK_LETTERS.include?(stem_unit.letter) && stem_unit.vowel.nil?
-        preceding_vowel = slot_index > 0 ? stem_units[slot_index - 1].vowel : nil
         return nil unless preceding_vowel.nil? || ARABIC_LONG_VOWEL_LETTERS.fetch(preceding_vowel, []).include?(stem_unit.letter)
         match_score += 2 # the long vowel of a hollow weight is as telling as a fixed letter
       elsif stem_unit.letter == 'ا' && !root_hamza_carrier
@@ -490,12 +491,18 @@ def match_arabic_weight(stem_units, weight_definition)
       end
       hamza_carrier_read ||= root_hamza_carrier
       radical_letter = root_hamza_carrier ? ARABIC_ROOT_HAMZA : arabic_radical_letter(stem_unit.letter)
-      # alef, alef maqsura and hamza hide which weak radical they stand for (so does the long vowel of a
-      # hollow weight); a written و/ی after the first radical may still stand for its twin
-      if ['ا', ARABIC_ALEF_MAQSURA].include?(stem_unit.letter) || slot[:weak_only] ||
-         (radical_letter == ARABIC_ROOT_HAMZA && radical_index >= 1) # a hamza inside the root may stand for و/ی (سَمَاۤء)
-        weak_radical_indexes << radical_index unless root_hamza_carrier
+      if slot[:weak_only]
+        # the long vowel of a hollow weight is و or ی, never a hamza; after damma it is always و
+        # (یَقُولُ ← قول, فَخُور is not فَ + خیر), after fatha or kasra it may be either (قَالَ ← قول, بَاعَ ← بیع)
+        unless radical_letter == 'و' && preceding_vowel == :damma
+          weak_alternatives[radical_index] = ARABIC_WRITTEN_WEAK_TWINS.fetch(radical_letter, [])
+        end
+      elsif ['ا', ARABIC_ALEF_MAQSURA].include?(stem_unit.letter) ||
+            (radical_letter == ARABIC_ROOT_HAMZA && radical_index >= 1 && !root_hamza_carrier) # سَمَاۤء ← سمو
+        # alef, alef maqsura and a hamza inside the root hide which weak radical they stand for
+        weak_alternatives[radical_index] = ARABIC_WEAK_RADICAL_ALTERNATIVES.fetch(radical_letter, [])
       elsif radical_index >= 1 && %w[و ی].include?(stem_unit.letter)
+        # a written و/ی after the first radical may still stand for its twin
         written_weak_indexes << radical_index
       end
       if radicals[radical_index]
@@ -513,7 +520,7 @@ def match_arabic_weight(stem_units, weight_definition)
   (weight_definition[:implied_radicals] || {}).each do |missing_radical_index, implied_letter|
     return nil if radicals[missing_radical_index]
     radicals[missing_radical_index] = implied_letter
-    weak_radical_indexes << missing_radical_index
+    weak_alternatives[missing_radical_index] = ARABIC_WEAK_RADICAL_ALTERNATIVES.fetch(implied_letter, [])
     match_score -= 1
   end
   if weight_definition[:geminate]
@@ -533,7 +540,7 @@ def match_arabic_weight(stem_units, weight_definition)
      !ARABIC_COMMON_ROOTS[root] && ARABIC_COMMON_ROOTS["ذ#{root[1..]}"]
     root = "ذ#{root[1..]}"
   end
-  { score: match_score, root: root, weak_radical_indexes: weak_radical_indexes.uniq,
+  { score: match_score, root: root, weak_alternatives: weak_alternatives,
     written_weak_indexes: written_weak_indexes.uniq, hamza_carrier_read: hamza_carrier_read }
 end
 
@@ -549,12 +556,12 @@ ARABIC_COMMON_ROOT_BONUS = 3
 
 # The best-known reading among a root and its weak-letter variants (the root as written wins ties).
 # A written و/ی is only read as its twin when the written root is unknown and the twin is a common root.
-def arabic_best_root_reading(root, weak_radical_indexes, written_weak_indexes = [])
-  root_readings = arabic_root_variants(root, weak_radical_indexes)
+def arabic_best_root_reading(root, weak_alternatives, written_weak_indexes = [])
+  root_readings = arabic_root_variants(root, weak_alternatives)
   if root_readings.none? { |root_reading| arabic_root_bonus(root_reading).positive? }
     root_readings += root_readings.flat_map do |root_reading|
-      arabic_root_variants(root_reading, written_weak_indexes, ARABIC_WRITTEN_WEAK_TWINS)
-        .select { |twin_reading| ARABIC_COMMON_ROOTS[twin_reading] }
+      written_twins = written_weak_indexes.to_h { |radical_index| [radical_index, ARABIC_WRITTEN_WEAK_TWINS.fetch(root_reading[radical_index], [])] }
+      arabic_root_variants(root_reading, written_twins).select { |twin_reading| ARABIC_COMMON_ROOTS[twin_reading] }
     end
   end
   root_readings.each_with_index.max_by do |root_reading, reading_index|
@@ -563,11 +570,12 @@ def arabic_best_root_reading(root, weak_radical_indexes, written_weak_indexes = 
 end
 ARABIC_WRITTEN_WEAK_TWINS = { 'و' => %w[ی], 'ی' => %w[و] }.freeze
 
-def arabic_root_variants(root, weak_radical_indexes, alternatives_by_letter = ARABIC_WEAK_RADICAL_ALTERNATIVES)
-  weak_radical_indexes.reduce([root]) do |root_variants, radical_index|
+# The root and every reading of it with its weak radicals swapped for their alternatives
+# (alternatives_by_index: radical index => letters that radical may also be)
+def arabic_root_variants(root, alternatives_by_index)
+  alternatives_by_index.reduce([root]) do |root_variants, (radical_index, alternative_letters)|
     root_variants.flat_map do |root_variant|
-      alternatives = alternatives_by_letter[root_variant[radical_index]] || []
-      [root_variant] + alternatives.map do |alternative_letter|
+      [root_variant] + alternative_letters.map do |alternative_letter|
         root_variant.dup.tap { |variant| variant[radical_index] = alternative_letter }
       end
     end
@@ -789,7 +797,7 @@ def compute_arabic_word_analysis(word)
         match_result = match_arabic_weight(expanded_stem_units, weight_definition)
         next unless match_result
 
-        root_reading = arabic_best_root_reading(match_result[:root], match_result[:weak_radical_indexes],
+        root_reading = arabic_best_root_reading(match_result[:root], match_result[:weak_alternatives],
                                                 match_result[:written_weak_indexes])
         weight_score = match_result[:score]
         # ءَا read as أَأۡ (ءَامَنَ ← أمن) only for known roots; ءَایَـٰت is a plural in ات, not أَفْعَال

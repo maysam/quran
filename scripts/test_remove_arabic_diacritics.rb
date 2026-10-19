@@ -262,6 +262,9 @@ class TestRemoveArabicDiacritics < Test::Unit::TestCase
     assert_equal("یسر", remove_arabic_diacritics("یَسِیرࣱ"), "tanwin marks a noun (فَعِیل), never an imperfect verb")
     assert_equal("ربب", remove_arabic_diacritics("رَبَّكَ"), "a doubled letter before a pronoun is a geminate root")
     assert_equal("نصف", remove_arabic_diacritics("نِصۡفُ"), "an imperfect prefix never takes kasra, so نِصۡف is no verb from صفو")
+    assert_equal("فخر", remove_arabic_diacritics("فَخُورٌ"), "فَعُول: a long و after damma is always و, so not فَ + خور/خیر")
+    assert_equal("وسل", remove_arabic_diacritics("وَسِیلَةَ"), "فَعِیلَة: the long vowel of a hollow weight is never a hamza (not سأل)")
+    assert_equal("نور", remove_arabic_diacritics("وَنُورࣱ"), "وَ + نُور: here the conjunction reading is right")
   end
 
   def test_roots_of_weights
@@ -286,6 +289,7 @@ class TestRemoveArabicDiacritics < Test::Unit::TestCase
   def test_particles_and_special_words
     assert_equal("على", remove_arabic_diacritics("عَلَىٰ"), "particles have no root")
     assert_equal("الذین", remove_arabic_diacritics("وَٱلَّذِینَ"))
+    assert_equal("سوف", remove_arabic_diacritics("فَسَوۡفَ"), "فَ + the particle سَوۡفَ")
     assert_equal("الم", remove_arabic_diacritics("الۤمۤ"), "disjointed letters are kept")
     assert_equal("أنس", remove_arabic_diacritics("ٱلنَّاسِ"), "irregular ناس")
     assert_equal("", remove_arabic_diacritics(""))

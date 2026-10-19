@@ -101,10 +101,15 @@
 - [x] ت → ط after ص ض ط ظ, ت → د after د ذ ز; passive اُفْتُعِلَ; ذ + ت → دّ read as ذ (مُدَّكِر)
 - [x] Imperfect prefixes never take kasra (نِصۡف stays نصف)
 
+### Corrections: فخور
+- [x] `فَخُورٌ` → فخر (فَعُول), not فَ + خور → خیر
+- [x] Hollow long vowel: و after damma is always و; ا/ی may be و or ی, never a hamza (وَسِیلَة → وسل); alternatives kept per radical position
+- [x] سَوۡفَ added as a particle; فخر added to the common roots
+
 ## Current Prompt
-**Task**: corrections — ص ط ف is the root for اصطفیتك but it was not recognized; it has a postfix and the rest is one word coming from root
-- `ٱصۡطَفَیۡتُكَ` is now recognised as `اصطفی` + postfix `تك`; its root is ص ف و (اِفْتَعَلَ, whose ت became ط after ص — the corpus agrees), so it joins اصطفى، یصطفی، مصطفی on one page
-- The whole family of assimilated Form VIII words was fixed (صبر، ضرر، صنع، زید، دعو، ذكر …), plus the kasra rule for imperfect prefixes
+**Task**: correction — the root for فَخُورٌ is فخر
+- `فَخُورٌ` was split as فَ + خُور and its و swapped to ی (خیر); now it is the weight فَعُول of فخر
+- A long و after damma is never swapped, and a hollow long vowel never stands for a hamza (also fixed وَسِیلَة → وسل); سَوۡفَ is a particle
 
 ## Project Structure
 ```

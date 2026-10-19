@@ -111,7 +111,7 @@ analyze_arabic_word("بِـَٔایَـٰتِنَا")
 # => { root: "أیی", stem: "آیة", kind: :root, weight: "فَعل", proclitics: ["ب"], suffix: "اتنا" }
 ```
 
-Measured against the Quranic Arabic Corpus segmentation: prefixes are stripped correctly for 99.4% of
+Measured against the Quranic Arabic Corpus segmentation: prefixes are stripped correctly for 99.5% of
 words, postfixes for 96.9%, and 95.3% of root-bearing words get the corpus root.
 
 Run the tests with `ruby scripts/test_remove_arabic_diacritics.rb`.
