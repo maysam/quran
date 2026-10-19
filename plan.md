@@ -74,20 +74,39 @@
 - [x] Add CSS styling for alphabet grid, letter pages, and pagination
 - [x] Update navigation to include "Words" link
 
+### Root Extraction Using Weights (أوزان)
+- [x] Parse vowelized words into letter units (letter, vowel, shadda, silent)
+- [x] Vowel-aware proclitic/suffix stripping
+- [x] Match stems against vowelized ف ع ل weight templates (sound, hollow, defective, geminate, assimilated, quadriliteral)
+- [x] Common-roots lexicon tie-breaker for weak radicals; particles and irregular words
+- [x] `remove_arabic_diacritics(text, root: true)`, `arabic_word_root`, `analyze_arabic_word`
+- [x] Show root on word pages; tests added; ~91% vs Quranic Arabic Corpus gold roots
+- [x] Regenerate content (`ruby scripts/generate-verses.rb`) so word pages include roots
+- [x] Root index pages grouping all words of a root
+
+### Strip Prefixes/Postfixes and Return Roots by Default
+- [x] `remove_arabic_diacritics` returns roots by default; `root: false` returns stems; old behaviour kept as `strip_arabic_diacritics`
+- [x] One analysis path for every word (particles, pronouns, divine name, irregular words included) so prefixes are always stripped
+- [x] Vowel-driven rules: long-vowel agreement, tanwin/article ⇒ noun, imperative endings, vowelized particle entries
+- [x] Evaluated against Quranic Arabic Corpus segmentation: prefixes 99.4%, postfixes 96.8%, roots 95.1%
+- [x] Word index keyed by root with word-form lists; generator clears stale pages; content regenerated; Jekyll build verified
+
+### Filter Root Pages by Word Form
+- [x] Word-form chips link to `/words/<root>/<form>/` (paginated, only that form highlighted); "All" chip back to the root
+- [x] Shared `write_occurrence_pages` for root and form lists; `form:` front matter
+- [x] Fixed invisible "Next →" label on word pages; verified in the browser (desktop and mobile)
+
 ## Current Prompt
-**Task**: Restructure word index to use paginated letter pages instead of single long page
-- Main `/words/` page shows alphabet grid with 34 letters and word counts
-- Clicking a letter goes to `/words/{letter_code}/` with paginated word list
-- Each page shows 24 words in a grid layout
-- Pagination controls for navigating between pages
-- Responsive design for mobile and desktop
+**Task**: clicking on word-forms should also filter by them
+- Each word form of a root got its own paginated list at `/words/<root>/<form>/`; the chips are links with an active state and an "All" chip
+- Only the selected form is highlighted in the verses; content regenerated and the Jekyll build verified (2,382 roots, 5,235 form lists)
 
 ## Project Structure
 ```
 /Users/maysam/Workspace/aralel/indented/
 ├── _layouts/            # Jekyll layouts (default, verse, word)
 ├── _verses/             # 6,236 verse markdown files (Jekyll collection)
-├── _words/              # 18,857 word markdown files (Jekyll collection)
+├── _words/              # ~2,400 root/particle pages (Jekyll collection)
 ├── words/               # Paginated letter pages
 │   ├── 1569/           # Letter ء pages
 │   │   ├── index.html  # Page 1

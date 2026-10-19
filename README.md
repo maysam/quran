@@ -5,10 +5,10 @@ A beautiful static website displaying all 6236 verses of the Holy Quran with com
 ## Features
 
 - **Individual Verse Pages**: Each verse has its own dedicated page with full navigation
-- **Word Index**: Browse 21,106+ unique Quran words alphabetically
-- **Individual Word Pages**: Each word shows all its occurrences across the Quran
+- **Root Index**: Browse the ~2,400 roots and particles of the Quran alphabetically
+- **Root Pages**: Each root lists its word forms and all their occurrences across the Quran
 - **Arabic RTL Support**: Proper right-to-left text rendering with Amiri font
-- **Diacritic-Free Indexing**: Words indexed without diacritical marks for better searching
+- **Root-Based Indexing**: Prefixes and postfixes stripped and every word reduced to its root using its vowels and weight (وزن)
 - **Responsive Design**: Works beautifully on desktop and mobile devices
 - **Decap CMS**: Content management interface at `/admin/`
 - **Fast Static Site**: Built with Jekyll for optimal performance
@@ -51,7 +51,7 @@ The site will be available at `http://localhost:4000`
 │   ├── verse.html       # Verse page template
 │   └── word.html        # Word page template
 ├── _verses/             # Generated verse markdown files (6236 files)
-├── _words/              # Generated word markdown files (21106+ files)
+├── _words/              # Generated root/particle pages (~2,400 files)
 ├── admin/               # Decap CMS admin interface
 │   ├── config.yml       # CMS configuration
 │   └── index.html       # CMS entry point
@@ -71,7 +71,7 @@ The site will be available at `http://localhost:4000`
 
 The `generate-verses.rb` script processes the Quran text and creates:
 - **6,236 verse pages** in `_verses/`
-- **21,106+ word pages** in `_words/`
+- **~2,400 root and particle pages** in `_words/`
 - **Word index page** at `/words/`
 - **Word occurrence data** in `_data/words.json`
 
@@ -82,11 +82,38 @@ ruby scripts/generate-verses.rb
 
 ## Word Indexing
 
-The word index feature:
-- Removes Arabic diacritical marks (tashkeel) for better word matching
-- Creates individual pages for each unique word
-- Shows all verses containing each word
-- Organizes words alphabetically by Arabic letters
+The word index is organised by root (جذر), like a Quran concordance (المعجم المفهرس):
+- Every word is stripped of its prefixes (وَ فَ بِ لِ كَ سَ ال …) and postfixes (pronouns, plural/dual and
+  verb endings) and reduced to its root, e.g. `بِأَحۡكَمِ` and `ٱلۡحَـٰكِمِینَ` both go to the page of `ح ك م`
+- Each root page lists the word forms built on it (أحكم، حاكم، حكیم، حكمة … with counts) and every verse
+  where they occur, with those words highlighted
+- The word forms are filters: clicking one (e.g. أحكم) shows only its occurrences at `/words/<root>/<form>/`,
+  and "All" returns to the whole root
+- Particles and pronouns (من، على، الذین، هم …) have no root and keep their own pages
+- Roots and particles are organised alphabetically by their first letter
+
+### Root extraction
+
+`lib/arabic_utils.rb` analyses each vowelized Uthmani word as prefixes + a weight (وزن) + postfixes.
+The word is split into letters with their vowels; prefixes are peeled off only when their vowel fits
+(بِ with kasra, وَ/فَ with fatha, the article with a silent or sukun lam …); the stem is matched
+against vowelized weights built on ف ع ل (فَاعِل, مَفْعُول, أَفْعَل, اِسْتَفْعَلَ, یَفْعُلُ, hollow, defective,
+geminate and assimilated variants). A weight whose vowels clash with the word is ruled out, a long
+vowel must match the vowel before it, and tanwin or the article rule out verb weights. A list of
+frequent Quranic roots breaks ties between equally good readings (قال → قول, not قیل).
+
+```ruby
+remove_arabic_diacritics("بِأَحۡكَمِ ٱلۡحَـٰكِمِینَ")              # => "حكم حكم"   (roots)
+remove_arabic_diacritics("بِأَحۡكَمِ ٱلۡحَـٰكِمِینَ", root: false) # => "أحكم حاكم" (prefixes/postfixes stripped only)
+strip_arabic_diacritics("بِأَحۡكَمِ ٱلۡحَـٰكِمِینَ")               # => "بأحكم حاكمین" (diacritics only, as before)
+analyze_arabic_word("بِـَٔایَـٰتِنَا")
+# => { root: "أیی", stem: "آیة", kind: :root, weight: "فَعل", proclitics: ["ب"], suffix: "اتنا" }
+```
+
+Measured against the Quranic Arabic Corpus segmentation: prefixes are stripped correctly for 99.4% of
+words, postfixes for 96.8%, and 95.1% of root-bearing words get the corpus root.
+
+Run the tests with `ruby scripts/test_remove_arabic_diacritics.rb`.
 
 Access the word index at: `/words/`
 

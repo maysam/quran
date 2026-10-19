@@ -1,5 +1,46 @@
 # Changelog
 
+## [2.5.0] - 2026-10-19
+
+### Added
+- Word forms on a root page are now filters: clicking a form (e.g. `أحكم` under `ح ك م`) opens `/words/<root>/<form>/`, a paginated list of only that form's occurrences with only that form highlighted; an "All" chip leads back to the whole root, and the list being shown is marked active
+- `generate-verses.rb`: page writing extracted into `write_occurrence_pages` (shared by root and form lists), forms filter built by `word_forms_filter_html`, `highlight_word_in_verse` takes an optional form; word pages carry a `form:` front matter field (5,235 form lists)
+
+### Fixed
+- The "Next →" pagination button on word pages showed no label (`.word-content a` painted the text in the button's own green)
+
+## [2.4.0] - 2026-10-19
+
+### Changed
+- `remove_arabic_diacritics(text)` now strips prefixes and postfixes and returns the root of every word by default (`بِأَحۡكَمِ → حكم`); `root: false` returns the word without its prefixes/postfixes (`بِأَحۡكَمِ → أحكم`)
+- The previous diacritics-only normalisation is kept unchanged as `strip_arabic_diacritics`; the existing tests now call it with their expectations untouched
+- The word index is now a root index: one page per root listing its word forms (with counts) and all occurrences; particles/pronouns keep their own pages (2,382 pages instead of 13,804)
+- `generate-verses.rb` clears pages of earlier runs before writing, so words no longer in the index (e.g. `بأحكم`) disappear; index wording says roots
+
+### Improved (prefix/postfix stripping and roots)
+- Every word now goes through the same prefix → weight → postfix analysis, including particles, pronouns and the divine name (`بِمَا → ب + ما`, `لَهُمۡ → لَ + هم`, `لِلَّهِ → لِ + الله`, `وَلَقَدۡ → وَ + لَ + قد`)
+- Prefixes added or fixed: interrogative أَ/ءَ before particles, vocative یَـٰ after وَ, oath تَ, `لِمَ` (لِ + ما) vs the particle `لَمۡ`
+- Postfixes added or fixed: dual/plural construct + pronoun (`یَدَیۡهِ`), `ی` merged by shadda (`لَدَیَّ`), feminine ت (`قَالَتِ`, `صَلَاتِهِمۡ`), `ـتُمُوهُنَّ`, plural `ات` preferred
+- Vowel rules: a long vowel must echo the vowel before it (fatha+ا, kasra+ی, damma+و), so `لَیۡسَ` is not a hollow weight; tanwin, the article and بِ/كَ rule out verb weights (`یَسِیرࣱ → یسر`); imperatives need a final sukun or an ending; particle entries can carry vowels (`هَلۡ` vs `أَهۡلِ`)
+- Weak letters: a written و/ی only swaps for its twin when its own reading is unknown (`دُونِ` stays دون); a hamza + long vowel at the start is the root's hamza (`ءَامَنُوا۟`, `إِیمَـٰن` → أمن); defective perfects only before وا/تۡ
+- More weights (imperatives of derived forms, assimilated Form V, Form IV of hamza-initial roots, passive Form X, plurals فُعَّل/فَعَالَى/أَفَاعِیل…), irregular words (أَیَّام، أَبَت، سَنَة، ٱمۡرِئ…) and a 600-root lexicon written with أ for hamza
+- Accuracy against the Quranic Arabic Corpus segmentation: prefixes 92.4% → 99.4%, postfixes 86.5% → 96.8%, roots 90.9% → 95.1%
+- Analyses are cached per word, so generating the whole site re-analyses each distinct word only once
+
+## [2.3.0] - 2026-10-19
+
+### Added
+- Root extraction (جذر) from morphological weights (أوزان) in `lib/arabic_utils.rb`:
+  - `remove_arabic_diacritics(text, root: true)` reduces every word to its root, reading the vowels to identify the weight before discarding them (default behaviour without `root:` is unchanged)
+  - `arabic_word_root(word)` and `analyze_arabic_word(word)` (returns root, matched weight, proclitics and suffix)
+  - Vowelized weight templates on ف ع ل: Form I–X perfect/imperfect/participles, common noun and plural weights, quadriliterals, plus hollow (قال/یقول), defective (قُلۡ/ٱهۡدِ/یَدۡعُ), geminate (یُحِبُّ/ضالّ) and assimilated (ٱتَّقُوا۟) variants
+  - Vowel-aware clitic stripping (وَ فَ بِ لِ كَ سَ, interrogative ءَ, vocative یَـٰ, lam of command, article incl. sun letters and ٱلَّیۡل) and suffix stripping (pronouns, inflections, energetic nun, shadda-merged suffixes like كُنَّا)
+  - Uthmani handling: silent letters (۟) are never radicals, `وٰ` reads as alef, combining/seatless hamza, disjointed letters (الۤمۤ) kept as-is
+  - Common-roots lexicon to break ties between weak-letter readings; particle list returned unchanged
+  - ~91% agreement with Quranic Arabic Corpus gold roots (43,211 / 47,533 root-bearing words)
+- Word pages show the word's root (`root:` frontmatter + "Root: ر ح م" line, styled via `.word-root`)
+- Tests for root extraction in `scripts/test_remove_arabic_diacritics.rb`
+
 ## [2.2.7] - 2026-03-09
 
 ### Fixed

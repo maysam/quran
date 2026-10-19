@@ -8,13 +8,14 @@ def word_to_slug(word)
 end
 
 # Highlight occurrences of target_slug word within verse text HTML
-# Wraps matching anchor tags (by diacritics-free comparison) with a highlight span
-def highlight_word_in_verse(verse_html, target_slug)
+# Wraps matching anchor tags (same root) with a highlight span; with target_form, only the words of
+# that form (the word without prefixes/postfixes, e.g. أحكم under حكم) are highlighted
+def highlight_word_in_verse(verse_html, target_slug, target_form = nil)
   verse_html.gsub(/<a href='([^']*)'>(.*?)<\/a>/) do
     href = $1
     original_word = $2
     cleaned = remove_arabic_diacritics(original_word)
-    if cleaned == target_slug
+    if cleaned == target_slug && (target_form.nil? || arabic_word_stem(original_word) == target_form)
       "<a href='#{href}'><span class=\"word-highlight\">#{original_word}</span></a>"
     else
       "<a href='#{href}'>#{original_word}</a>"
@@ -22,6 +23,87 @@ def highlight_word_in_verse(verse_html, target_slug)
   end
 end
 
+
+# The word forms of a root as filter links: "All" leads back to the root page and each form to the
+# list of its own occurrences (/words/<root>/<form>/); the list being shown is marked active
+def word_forms_filter_html(root_slug, word_forms, total_occurrences, active_form)
+  if word_forms.length < 2
+    only_form, only_form_count = word_forms.first
+    return "<p class=\"word-forms\" lang=\"ar\"><span class=\"word-form active\">#{only_form} <small>#{only_form_count}</small></span></p>"
+  end
+
+  all_forms_link = "<a href=\"/words/#{root_slug}/\" class=\"word-form all#{' active' if active_form.nil?}\">All <small>#{total_occurrences}</small></a>"
+  form_links = word_forms.map do |form, form_count|
+    "<a href=\"/words/#{root_slug}/#{form}/\" class=\"word-form#{' active' if form == active_form}\">#{form} <small>#{form_count}</small></a>"
+  end
+  "<p class=\"word-forms\" lang=\"ar\">#{([all_forms_link] + form_links).join(' ')}</p>"
+end
+
+OCCURRENCES_PER_PAGE = 20
+
+# Write occurrences as paginated word pages: page 1 at /words/<url_slug>/ (file _words/<url_slug>.md),
+# later pages at /words/<url_slug>/page/N/ (file _words/<url_slug>/page/N/index.md).
+# Verses highlight the words of highlight_slug (only those of highlight_form, when given).
+# Returns the number of pages written.
+def write_occurrence_pages(words_dir, url_slug, occurrences, title:, word:, root:, form:, header:, highlight_slug:, highlight_form: nil)
+  total_pages = (occurrences.length.to_f / OCCURRENCES_PER_PAGE).ceil
+
+  (1..total_pages).each do |page_num|
+    page_occurrences = occurrences.slice((page_num - 1) * OCCURRENCES_PER_PAGE, OCCURRENCES_PER_PAGE)
+
+    occurrences_html = "<ul>\n" + page_occurrences.map do |occ|
+      highlighted_verse = highlight_word_in_verse(occ[:word_text], highlight_slug, highlight_form)
+      surah_label = "#{occ[:surah_name]} #{occ[:surah_number]}:#{occ[:verse_in_surah]}"
+      "  <li>#{highlighted_verse}\n    <a href=\"#{occ[:path]}\" class=\"surah-caption\">#{surah_label}</a>\n  </li>"
+    end.join("\n") + "\n</ul>"
+
+    # Build pagination HTML
+    pagination_html = if total_pages > 1
+      prev_url = page_num > 1 ? (page_num == 2 ? "/words/#{url_slug}/" : "/words/#{url_slug}/page/#{page_num - 1}/") : nil
+      next_url = page_num < total_pages ? "/words/#{url_slug}/page/#{page_num + 1}/" : nil
+      prev_link = prev_url ? "<a href=\"#{prev_url}\" class=\"page-link prev\">← Previous</a>" : '<span class="page-link disabled">← Previous</span>'
+      next_link = next_url ? "<a href=\"#{next_url}\" class=\"page-link next\">Next →</a>" : '<span class="page-link disabled">Next →</span>'
+      "<div class=\"pagination\">#{prev_link}<span class=\"page-info\">Page #{page_num} of #{total_pages}</span>#{next_link}</div>"
+    else
+      ''
+    end
+
+    permalink = page_num == 1 ? "/words/#{url_slug}/" : "/words/#{url_slug}/page/#{page_num}/"
+
+    markdown = <<~MARKDOWN
+      ---
+      title: "#{title.gsub('"', '\\"')}"
+      word: "#{word.gsub('"', '\\"')}"
+      root: "#{root.gsub('"', '\\"')}"
+      form: "#{form.gsub('"', '\\"')}"
+      occurrences: #{occurrences.length}
+      layout: word
+      permalink: #{permalink}
+      pagination_html: "#{pagination_html.gsub('"', '\\"')}"
+      ---
+
+      #{header}
+
+      #{pagination_html}
+
+      ## Occurrences
+
+      #{occurrences_html}
+
+      #{pagination_html}
+    MARKDOWN
+
+    file_path = if page_num == 1
+      File.join(words_dir, "#{url_slug}.md")
+    else
+      File.join(words_dir, url_slug, 'page', page_num.to_s, 'index.md')
+    end
+    FileUtils.mkdir_p(File.dirname(file_path))
+    File.write(file_path, markdown, encoding: 'utf-8')
+  end
+
+  total_pages
+end
 
 # Surah data: [name, verseCount]
 surah_data = [
@@ -133,21 +215,23 @@ lines.each_with_index do |line, index|
 
   words = line.split(' ')
 
-  # Build word links first (needed for both verse page and word index)
+  # Build word links first (needed for both verse page and word index);
+  # remove_arabic_diacritics strips prefixes/postfixes and gives the word's root, so pages are per root
   word_links = words.map do |original_word|
     word = remove_arabic_diacritics(original_word)
     next if word.strip.empty?
     url = "/words/#{word_to_slug(word)}/"
-    [word, "<a href='#{url}'>#{original_word}</a>"]
+    [word, "<a href='#{url}'>#{original_word}</a>", original_word]
   end.compact
 
-  word_text = word_links.map { |_, link| link }.join(" ")
+  word_text = word_links.map { |_, link, _| link }.join(" ")
 
   # Collect all words for index
-  word_links.each do |cleaned_word, _link|
+  word_links.each do |cleaned_word, _link, original_word|
     word_index[cleaned_word] ||= []
     word_index[cleaned_word] << {
-      original_word: words.find { |w| remove_arabic_diacritics(w) == cleaned_word } || cleaned_word,
+      original_word: original_word,
+      stem: arabic_word_stem(original_word),
       verse_number: verse_number,
       escaped_text: escaped_text,
       word_text: word_text,
@@ -214,79 +298,55 @@ File.write(word_index_path, JSON.pretty_generate(word_index), encoding: 'utf-8')
 # Create word pages
 words_dir = File.join(__dir__, '..', '_words')
 FileUtils.mkdir_p(words_dir)
+# remove pages left by earlier runs, so a word no longer in the index (e.g. بأحكم, now under حكم) disappears
+FileUtils.rm_rf(Dir.glob(File.join(words_dir, '*')))
 
 puts "\nGenerating word pages..."
 word_count = 0
-
-occurrences_per_page = 20
+form_list_count = 0
 
 word_index.each do |word, occurrences|
   slug = word_to_slug(word)
-  escaped_word = word.gsub('"', '\\"')
   total_occurrences = occurrences.length
-  total_pages = (total_occurrences.to_f / occurrences_per_page).ceil
   original_word = occurrences.first[:original_word]
+  # a root page (ح ك م) lists the word forms built on the root; particles keep their own page
+  root_page = analyze_arabic_word(original_word)[:kind] == :root
+  page_heading = root_page ? word.chars.join(' ') : word
+  page_title = "#{root_page ? 'Root' : 'Word'}: #{page_heading}"
+  word_forms = occurrences.map { |occurrence| occurrence[:stem] }.tally.sort_by { |stem, count| [-count, stem] }
 
-  (1..total_pages).each do |page_num|
-    page_occurrences = occurrences.slice((page_num - 1) * occurrences_per_page, occurrences_per_page)
+  root_header = <<~MARKDOWN
+    # #{page_heading}
 
-    occurrences_html = "<ul>\n" + page_occurrences.map do |occ|
-      highlighted_verse = highlight_word_in_verse(occ[:word_text], word)
-      surah_label = "#{occ[:surah_name]} #{occ[:surah_number]}:#{occ[:verse_in_surah]}"
-      "  <li>#{highlighted_verse}\n    <a href=\"#{occ[:path]}\" class=\"surah-caption\">#{surah_label}</a>\n  </li>"
-    end.join("\n") + "\n</ul>"
+    #{root_page ? word_forms_filter_html(slug, word_forms, total_occurrences, nil) : ''}
 
-    # Build pagination HTML
-    pagination_html = if total_pages > 1
-      prev_url = page_num > 1 ? (page_num == 2 ? "/words/#{slug}/" : "/words/#{slug}/page/#{page_num - 1}/") : nil
-      next_url = page_num < total_pages ? "/words/#{slug}/page/#{page_num + 1}/" : nil
-      prev_link = prev_url ? "<a href=\"#{prev_url}\" class=\"page-link prev\">← Previous</a>" : '<span class="page-link disabled">← Previous</span>'
-      next_link = next_url ? "<a href=\"#{next_url}\" class=\"page-link next\">Next →</a>" : '<span class="page-link disabled">Next →</span>'
-      "<div class=\"pagination\">#{prev_link}<span class=\"page-info\">Page #{page_num} of #{total_pages}</span>#{next_link}</div>"
-    else
-      ''
+    This #{root_page ? 'root' : 'word'} appears **#{total_occurrences} time#{'s' if total_occurrences != 1}** in the Quran.
+  MARKDOWN
+  write_occurrence_pages(words_dir, slug, occurrences,
+                         title: page_title, word: word, root: root_page ? word : '', form: '',
+                         header: root_header, highlight_slug: word)
+
+  # clicking a form filters the root's occurrences: each form gets its own list at /words/<root>/<form>/
+  if root_page && word_forms.length > 1
+    occurrences.group_by { |occurrence| occurrence[:stem] }.each do |form, form_occurrences|
+      form_header = <<~MARKDOWN
+        # #{page_heading}
+
+        #{word_forms_filter_html(slug, word_forms, total_occurrences, form)}
+
+        The form <strong><bdi lang="ar" class="word-form-name">#{form}</bdi></strong> appears **#{form_occurrences.length} time#{'s' if form_occurrences.length != 1}** in the Quran.
+      MARKDOWN
+      write_occurrence_pages(words_dir, "#{slug}/#{form}", form_occurrences,
+                             title: "#{page_title} · #{form}", word: word, root: word, form: form,
+                             header: form_header, highlight_slug: word, highlight_form: form)
+      form_list_count += 1
     end
-
-    permalink = page_num == 1 ? "/words/#{slug}/" : "/words/#{slug}/page/#{page_num}/"
-
-    markdown = <<~MARKDOWN
-      ---
-      title: "Word: #{escaped_word}"
-      word: "#{escaped_word}"
-      occurrences: #{total_occurrences}
-      layout: word
-      permalink: #{permalink}
-      pagination_html: "#{pagination_html.gsub('"', '\\"')}"
-      ---
-
-      # #{original_word}
-
-      This word appears **#{total_occurrences} time#{'s' if total_occurrences != 1}** in the Quran.
-
-      #{pagination_html}
-
-      ## Occurrences
-
-      #{occurrences_html}
-
-      #{pagination_html}
-    MARKDOWN
-
-    if page_num == 1
-      file_path = File.join(words_dir, "#{slug}.md")
-    else
-      page_dir = File.join(words_dir, slug, 'page', page_num.to_s)
-      FileUtils.mkdir_p(page_dir)
-      file_path = File.join(page_dir, 'index.md')
-    end
-
-    File.write(file_path, markdown, encoding: 'utf-8')
   end
 
   word_count += 1
 end
 
-puts "Generated #{word_count} word pages in #{words_dir}"
+puts "Generated #{word_count} word pages and #{form_list_count} word-form lists in #{words_dir}"
 
 # Create alphabet index
 puts "\nGenerating alphabet index..."
@@ -311,7 +371,7 @@ index_content = <<~MARKDOWN
 
   # Word Index
 
-  Browse all #{word_count} unique words in the Quran by letter.
+  Browse all #{word_count} roots and particles of the Quran by letter.
 
   <div class="alphabet-grid">
 
@@ -325,7 +385,7 @@ alphabet_groups.keys.sort.each do |letter|
     <div class="alphabet-card">
       <a href="/words/#{letter_code}/">
         <div class="alphabet-letter">#{letter}</div>
-        <div class="alphabet-count">#{word_count_for_letter} word#{'s' if word_count_for_letter != 1}</div>
+        <div class="alphabet-count">#{word_count_for_letter} root#{'s' if word_count_for_letter != 1}</div>
       </a>
     </div>
 
@@ -343,6 +403,10 @@ puts "Generated main word index at #{index_path}"
 puts "Generating letter pages..."
 words_letter_dir = File.join(__dir__, '..', 'words')
 FileUtils.mkdir_p(words_letter_dir)
+# remove letter pages left by earlier runs (one folder per letter code)
+Dir.glob(File.join(words_letter_dir, '*')).each do |letter_page_dir|
+  FileUtils.rm_rf(letter_page_dir) if File.basename(letter_page_dir).match?(/\A\d+\z/)
+end
 
 per_page = 24*4
 letter_pages_created = 0
@@ -413,7 +477,7 @@ alphabet_groups.keys.sort.each do |letter|
       <div class="letter-header">
         <a href="/words/" class="back-link">← Back to Alphabet</a>
         <h1>#{letter}</h1>
-        <p class="letter-info">#{total_words} word#{'s' if total_words != 1} starting with this letter</p>
+        <p class="letter-info">#{total_words} root#{'s' if total_words != 1} and particles starting with this letter</p>
       </div>
 
       #{pagination_html}
@@ -445,6 +509,6 @@ end
 puts "Generated #{letter_pages_created} letter pages"
 puts "\nDone! Summary:"
 puts "  - #{created} verse pages"
-puts "  - #{word_count} unique word pages"
+puts "  - #{word_count} unique word pages (#{form_list_count} word-form lists)"
 puts "  - #{alphabet_groups.keys.length} alphabet letters"
 puts "  - #{letter_pages_created} paginated letter pages (24 words per page)"
